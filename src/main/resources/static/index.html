@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Platform</title>
+  <style>
+    body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; }
+
+    header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:20px 60px; background:#0a0a0a; border-bottom:1px solid #222;
+    }
+    .logo { font-size:1.4em; font-weight:700; color:#00bfff; }
+
+    nav { display:flex; align-items:center; gap:150px; }
+    .dropdown { position:relative; display:inline-block; padding:6px 0; cursor:pointer; }
+    .dropdown::after {
+      content:" ⌄"; display:inline-block; font-size:.8em; color:#ccc;
+      transition:transform .25s ease, color .25s ease; transform-origin:center;
+    }
+    .dropdown:hover::after { transform:rotate(180deg); color:#00bfff; }
+
+    .dropdown-content {
+      display:none; position:absolute; background:#111; min-width:180px;
+      box-shadow:0 8px 16px rgba(0,0,0,.3); z-index:10;
+    }
+    .dropdown-content a { color:#fff; padding:10px 14px; text-decoration:none; display:block; }
+    .dropdown-content a:hover { background:#333; }
+    .dropdown:hover .dropdown-content { display:block; }
+
+    .actions { display:flex; align-items:center; gap:20px; }
+    .login-btn {
+      background:#0078ff; color:#fff; border:none; padding:8px 16px; border-radius:20px;
+      cursor:pointer; font-weight:700;
+    }
+    .login-btn:hover { background:#005ec9; }
+
+    .profile-btn {
+      background:transparent; border:none; padding:0; cursor:pointer;
+      line-height:0; border-radius:999px; outline:none;
+    }
+    .profile-btn svg {
+      width:36px; height:36px; background:#fff; border-radius:999px; padding:4px;
+    }
+    .profile-btn:hover svg { box-shadow:0 0 0 3px rgba(0,191,255,.25); }
+
+    main {
+      height:90vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+      background: radial-gradient(circle at 70% 40%, #003366, #000);
+    }
+    h1 { font-size:2.5em; color:#fff; }
+    h1 span { color:#00bfff; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">OS Platform</div>
+
+    <nav>
+      <div class="dropdown">
+        <span>Learn</span>
+        <div class="dropdown-content">
+          <a href="#">스케줄링</a>
+          <a href="#">페이지교체</a>
+          <a href="#">데드록</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <span>Simulator</span>
+        <div class="dropdown-content">
+          <a href="#">CPU 스케줄링 시뮬레이터</a>
+          <a href="#">페이지교체 시뮬레이터</a>
+          <a href="#">데드록 시뮬레이터</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <span>Compare</span>
+        <div class="dropdown-content">
+          <a href="#">스케줄링 알고리즘 비교</a>
+          <a href="#">페이지 교체 알고리즘 비교</a>
+          <a href="#">데드록 방법 비교</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <span>Graph</span>
+        <div class="dropdown-content">
+          <a href="#">스케줄링</a>
+          <a href="#">페이지교체</a>
+          <a href="#">데드록</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="actions">
+      <div id="authArea"></div>
+
+      <div class="dropdown">Language 🌐
+        <div class="dropdown-content">
+          <a href="#">Korean</a>
+          <a href="#">English</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h1>An <span>OS Platform</span> for<br> Scheduling, Paging, and Deadlock Simulation</h1>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('authArea');
+      if (!container) return;
+
+      const user = sessionStorage.getItem('user'); // 세션 기반 로그인 확인
+
+      if (user && user.trim() !== '') {
+        container.innerHTML = `
+          <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+            <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+            </svg>
+          </button>
+        `;
+      } else {
+        container.innerHTML = `
+          <button class="login-btn" onclick="location.href='login.html'">Login</button>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

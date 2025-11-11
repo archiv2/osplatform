@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn | CPU 스케줄링 - OS Platform</title>
+  <style>
+    :root{
+      --bg:#000;--bg-2:#0a0a0a;--panel:#111;--panel-2:#131313;--line:#222;
+      --text:#fff;--muted:#b9c2cc;--accent:#00bfff;--btn:#0078ff;--btn-hover:#005ec9;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
+    /* header */
+    header{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)}
+    .logo{font-size:1.4em;font-weight:700;color:var(--accent)}
+    nav{display:flex;align-items:center;gap:150px}
+    .dropdown{position:relative;display:inline-block;padding:6px 0;cursor:pointer}
+    .dropdown::after{content:" ⌄";display:inline-block;font-size:.8em;color:#ccc;transition:transform .25s ease,color .25s ease}
+    .dropdown:hover::after{transform:rotate(180deg);color:var(--accent)}
+    .dropdown-content{display:none;position:absolute;background:#111;min-width:180px;box-shadow:0 8px 16px rgba(0,0,0,.3);z-index:10}
+    .dropdown-content a{color:#fff;padding:10px 14px;text-decoration:none;display:block}
+    .dropdown-content a:hover{background:#333}
+    .dropdown:hover .dropdown-content{display:block}
+    .actions{display:flex;align-items:center;gap:20px}
+    .login-btn{background:var(--btn);color:#fff;border:none;padding:8px 16px;border-radius:20px;cursor:pointer;font-weight:700}
+    .login-btn:hover{background:var(--btn-hover)}
+    .profile-btn{background:transparent;border:none;padding:0;cursor:pointer;line-height:0;border-radius:999px;outline:none}
+    .profile-btn svg{width:36px;height:36px;background:#fff;border-radius:999px;padding:4px}
+    .profile-btn:hover svg{box-shadow:0 0 0 3px rgba(0,191,255,.25)}
+    /* layout */
+    .wrap{max-width:1150px;margin:0 auto;padding:40px 24px 120px}
+    .eyebrow{font-size:.9rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+    h1{margin:.25rem 0 0;font-size:2.2rem;line-height:1.2}
+    .lead{margin-top:12px;color:#d7e2ea;line-height:1.7}
+    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;margin-top:24px}
+    .panel{background:radial-gradient(120% 120% at 80% 20%,#003366 0%,#000 60%);border:1px solid var(--line);border-radius:16px;padding:20px;min-height:220px;display:flex;align-items:center;justify-content:center}
+    .cpu-svg{width:100%;max-width:360px;opacity:.95}
+    .cpu-svg .node{transition:transform .25s ease;transform-origin:center}
+    .panel:hover .node{transform:scale(1.08)}
+    .cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0 10px}
+    .card{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);border:1px solid var(--line);border-radius:14px;padding:18px}
+    .card h3{margin:0 0 8px;font-size:1.05rem;color:#e6f7ff}
+    .card p{margin:0;color:#c8d3dc;font-size:.95rem;line-height:1.6}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}
+    .badge{display:inline-block;font-size:.8rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:#9cc7ff;background:#0b1a2a}
+    .list{margin:10px 0 0 0;padding-left:18px;color:#c8d3dc}
+    .list li{margin:6px 0}
+    .glossary{margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .term{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px}
+    .term h4{margin:0 0 6px;font-size:1rem;color:#e6f7ff}
+    .meta{font-size:.83rem;color:var(--muted)}
+    .algos{margin-top:32px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .algo{background:linear-gradient(180deg,#0e0e0e 0%,#0f0f14 100%);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+    .algo h5{margin:0;font-size:1rem;color:#e6f7ff}
+    .algo p{margin:0;color:#c8d3dc;font-size:.93rem;line-height:1.5}
+    .cta{margin-top:auto;align-self:flex-start;background:transparent;color:var(--accent);border:1px solid rgba(0,191,255,.35);padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .2s ease}
+    .cta:hover{background:rgba(0,191,255,.08);border-color:rgba(0,191,255,.6)}
+    hr.sep{border:none;border-top:1px solid var(--line);margin:26px 0;opacity:.6}
+    @media (max-width:960px){nav{gap:36px}.hero,.cards-3,.two,.glossary,.algos{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">OS Platform</div>
+  <nav>
+    <!-- 링크 실제 이동으로 수정 -->
+    <div class="dropdown">
+      <span>Learn</span>
+      <div class="dropdown-content">
+        <a href="/learn-scheduling.html">스케줄링</a>
+        <a href="/learn-paging.html">페이지교체</a>
+        <a href="/learn-deadlock.html">데드록</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <span>Simulator</span>
+      <div class="dropdown-content">
+        <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
+        <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
+        <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <span><a href="/compare.html" style="color:#fff;text-decoration:none">Compare</a></span>
+    </div>
+    <div class="dropdown">
+      <span><a href="/graph-scheduling.html" style="color:#fff;text-decoration:none">Graph</a></span>
+    </div>
+  </nav>
+  <div class="actions">
+    <div id="authArea"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="eyebrow">LEARN / CPU Scheduling</div>
+  <h1>CPU 스케줄링이란?</h1>
+  <div class="lead">여러 프로세스 중 누구에게 <b>CPU</b>를 얼마나, 어떤 기준으로 배정할지 결정하는 운영체제의 핵심 기능입니다. 목표는 시스템의 <b>효율</b>, <b>공정</b>, <b>안정</b>을 동시에 만족하는 것.</div>
+
+  <div class="hero">
+    <div>
+      <div class="cards-3">
+        <div class="card">
+          <h3>효율성</h3>
+          <p>유휴 시간을 최소화하고 <b>CPU 이용률</b>과 <b>처리량</b>을 높입니다.</p>
+        </div>
+        <div class="card">
+          <h3>공정성</h3>
+          <p>모든 작업이 <b>기아(Starvation)</b> 없이 적절한 기회를 얻도록 합니다.</p>
+        </div>
+        <div class="card">
+          <h3>안정성</h3>
+          <p>응답 시간의 예측 가능성과 시스템 전반의 <b>일관성</b>을 보장합니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" aria-label="CPU panel">
+      <svg class="cpu-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <circle cx="200" cy="150" r="58" fill="#e8f6ff" stroke="#00bfff" stroke-width="6" filter="url(#glow)"/>
+        <text x="200" y="155" text-anchor="middle" font-size="22" font-weight="700" fill="#003b5f">CPU</text>
+        <g stroke="#00bfff" stroke-width="6">
+          <line x1="200" y1="88" x2="200" y2="38"/>
+          <line x1="200" y1="212" x2="200" y2="262"/>
+          <line x1="142" y1="150" x2="92"  y2="150"/>
+          <line x1="258" y1="150" x2="308" y2="150"/>
+          <line x1="166" y1="112" x2="124" y2="80"/>
+          <line x1="234" y1="112" x2="276" y2="80"/>
+          <line x1="166" y1="188" x2="124" y2="220"/>
+          <line x1="234" y1="188" x2="276" y2="220"/>
+        </g>
+        <g fill="#00bfff" class="node">
+          <circle cx="200" cy="34" r="10"/><circle cx="200" cy="266" r="10"/>
+          <circle cx="88"  cy="150" r="10"/><circle cx="312" cy="150" r="10"/>
+          <circle cx="118" cy="76"  r="10"/><circle cx="282" cy="76"  r="10"/>
+          <circle cx="118" cy="224" r="10"/><circle cx="282" cy="224" r="10"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <hr class="sep" />
+
+  <div class="two">
+    <div class="card">
+      <span class="badge">선점형 (Preemptive)</span>
+      <ul class="list">
+        <li>실행 중인 프로세스라도 <b>더 높은 우선순위/더 짧은 남은시간</b>이 오면 <b>강제 중단</b> 가능</li>
+        <li>짧은 응답시간에 유리 — 예: <b>SRT, RR</b></li>
+        <li class="meta">컨텍스트 스위칭 오버헤드가 존재</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="badge">비선점형 (Non-preemptive)</span>
+      <ul class="list">
+        <li>CPU를 잡은 프로세스가 <b>자발적으로</b> 양보할 때까지 유지</li>
+        <li>오버헤드가 낮고 단순 — 예: <b>FCFS, SJF</b></li>
+        <li class="meta">긴 작업이 앞에 오면 대기시간 증가(Convoy effect)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="glossary">
+    <div class="term"><h4>WT (대기시간)</h4><div class="meta">Ready Queue에서 기다린 총 시간</div></div>
+    <div class="term"><h4>RT (응답시간)</h4><div class="meta">도착 → 첫 실행까지 걸린 시간</div></div>
+    <div class="term"><h4>BT (버스트시간)</h4><div class="meta">CPU가 실제로 작업한 시간</div></div>
+    <div class="term"><h4>TAT (반환시간)</h4><div class="meta">도착 → 완료까지 총 소요</div></div>
+  </div>
+
+  <div class="algos">
+    <div class="algo">
+      <h5>FCFS</h5>
+      <p>먼저 온 작업부터 처리. 단순하지만 긴 작업이 앞에 오면 대기 폭증.</p>
+      <button class="cta" onclick="goSim('fcfs')">시뮬레이터에서 확인 →</button>
+    </div>
+    <div class="algo">
+      <h5>SJF</h5>
+      <p>버스트시간이 짧은 순. 평균 대기시간을 최소화(이론상)하나 <i>기아</i> 가능.</p>
+      <button class="cta" onclick="goSim('sjf')">시뮬레이터에서 확인 →</button>
+    </div>
+    <div class="algo">
+      <h5>RR</h5>
+      <p>고정 <i>Time Slice</i> 만큼 차례대로 할당. 대화형 시스템에 적합.</p>
+      <button class="cta" onclick="goSim('rr')">시뮬레이터에서 확인 →</button>
+    </div>
+    <div class="algo">
+      <h5>SRT</h5>
+      <p>남은 시간이 가장 짧은 작업 우선(선점형). 빠른 응답, 스위칭 비용↑.</p>
+      <button class="cta" onclick="goSim('srt')">시뮬레이터에서 확인 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 로그인/프로필 버튼 유지
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('authArea');
+    const user = sessionStorage.getItem('user');
+    if (user && user.trim() !== '') {
+      container.innerHTML = `
+        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </button>`;
+    } else {
+      container.innerHTML = `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+    }
+  });
+
+  // 시뮬레이터 이동 (알림 → 실제 이동)
+  function goSim(type){
+    // 예: /sim-scheduling.html?algo=fcfs
+    location.href = '/sim-scheduling.html?algo=' + encodeURIComponent(type);
+  }
+
+  // 리액트(3000)에서 열렸을 때는 8080 정적 페이지로 강제 이동하도록(라우터 가로채기 우회)
+  (function () {
+    if (location.port === "3000") {
+      document.querySelectorAll('.dropdown-content a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href.startsWith('/')) {
+          a.addEventListener('click', function(e){
+            e.preventDefault();
+            window.location.assign('http://localhost:8080'+href);
+          });
+        }
+      });
+    }
+  })();
+</script>
+</body>
+</html>

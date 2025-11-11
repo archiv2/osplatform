@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Page - OS Platform</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f5f6f8;
+      color: #222;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* 왼쪽 사이드바 */
+    .sidebar {
+      width: 260px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+    }
+
+    .sidebar h2 {
+      font-size: 1.1em;
+      color: #111;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    .menu-item {
+      font-size: 0.95em;
+      color: #333;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-item:hover {
+      background-color: #e8f5ff;
+      color: #0078ff;
+    }
+
+    /* 메인 콘텐츠 */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .welcome {
+      font-size: 1.2em;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .mood-text {
+      font-size: 1.5em;
+      color: #333;
+      margin-bottom: 40px;
+    }
+
+    .record-btn {
+      background-color: #0078ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+
+    .record-btn:hover {
+      background-color: #005ec9;
+    }
+  </style>
+</head>
+<body>
+  <!-- 왼쪽 메뉴 -->
+  <div class="sidebar">
+    <h2 id="userName">님의 페이지</h2>
+    <div class="menu-item">내 기록</div>
+  </div>
+
+  <!-- 오른쪽 메인 -->
+  <div class="main-content">
+
+    <button class="record-btn" onclick="createRecord()">내 기록 생성하기</button>
+  </div>
+
+  <script>
+    // 로그인 정보 가져오기
+    const user = sessionStorage.getItem('user');
+
+    if (user) {
+      document.getElementById('userName').innerText = `${user}님의 페이지`;
+    } else {
+      alert('로그인이 필요합니다.');
+      window.location.href = 'login.html';
+    }
+
+    // 버튼 클릭 시 
+    function createRecord() {
+      alert('페이지이동 구현예정');
+      // 추후 기능 연결 시: window.location.href = 'record.html';
+    }
+  </script>
+</body>
+</html>
