@@ -5,13 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Learn | CPU 스케줄링 - OS Platform</title>
   <style>
+
     :root{
-      --bg:#000;--bg-2:#0a0a0a;--panel:#111;--panel-2:#131313;--line:#222;
-      --text:#fff;--muted:#b9c2cc;--accent:#00bfff;--btn:#0078ff;--btn-hover:#005ec9;
+      --bg:#000; /* 배경색 */
+      --bg-2:#0a0a0a;
+      --panel:#111;
+      --panel-2:#131313;
+      --line:#222;
+      --text:#fff; /* 글자색 */
+      --muted:#b9c2cc;
+      --accent:#00bfff; /* 강조색 */
+      --btn:#0078ff;
+      --btn-hover:#005ec9;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
-    /* header */
+    body{margin:0;
+        font-family:Arial,system-ui,-apple-system,sans-serif;
+        background:var(--bg);
+        color:var(--text)
+    }
+  
+    /* header (상단 네비게이션)
+       - sticky로 스크롤 고정
+       - 드롭다운은 CSS hover로 설정 */
+
     header{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)}
     .logo{font-size:1.4em;font-weight:700;color:var(--accent)}
     nav{display:flex;align-items:center;gap:150px}
@@ -28,211 +45,384 @@
     .profile-btn{background:transparent;border:none;padding:0;cursor:pointer;line-height:0;border-radius:999px;outline:none}
     .profile-btn svg{width:36px;height:36px;background:#fff;border-radius:999px;padding:4px}
     .profile-btn:hover svg{box-shadow:0 0 0 3px rgba(0,191,255,.25)}
+  
     /* layout */
-    .wrap{max-width:1150px;margin:0 auto;padding:40px 24px 120px}
+    .wrap{
+      max-width:1150px;
+      margin:0 auto;
+      padding:40px 24px 120px;
+      overflow-x:hidden; /* 수정 : 가로 흔들림/미세 스크롤 방지함 */
+    }
     .eyebrow{font-size:.9rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
     h1{margin:.25rem 0 0;font-size:2.2rem;line-height:1.2}
     .lead{margin-top:12px;color:#d7e2ea;line-height:1.7}
-    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;margin-top:24px}
-    .panel{background:radial-gradient(120% 120% at 80% 20%,#003366 0%,#000 60%);border:1px solid var(--line);border-radius:16px;padding:20px;min-height:220px;display:flex;align-items:center;justify-content:center}
-    .cpu-svg{width:100%;max-width:360px;opacity:.95}
-    .cpu-svg .node{transition:transform .25s ease;transform-origin:center}
-    .panel:hover .node{transform:scale(1.08)}
-    .cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0 10px}
+  
+    /* markdown-like headings (◆ + 띄쓰) */
+    h2.md{font-size:1.6rem;margin:30px 0 12px}
+    h2.md::before{content:"\25C6";display:inline-block;margin-right:8px;color:#34b4ff;vertical-align:middle}
+    h3.md{font-size:1.15rem;margin:12px 0 8px;color:#9cc7ff}
+    h3.md::before{content:"\25C6";display:inline-block;margin-right:6px;color:#34b4ff;vertical-align:middle}
+   /* 카드 + CPU 비주얼 - grid 두 열, 우측 패널 */
+    .hero{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,500px); /* FIX: 두 열 모두 minmax로 안정화 */
+      gap:32px; align-items:center; margin-top:24px;
+    }
+    .panel{
+      background:radial-gradient(120% 120% at 80% 20%,#003366 0%,#000 60%);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:20px;
+      min-height:220px;
+      display:flex; align-items:center; justify-content:center;
+      width:100%; max-width:500px;
+    }
+    .panel svg{display:block;max-width:100%;height:auto}
+    #cpuCore text{font-size:24px;font-weight:800}
+    .cpu-svg{width:85%;max-width:240px;opacity:.95}
+  
+    /* 핵심 목표 3가지 카드 스타일 */
+    .cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0 10px}
     .card{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);border:1px solid var(--line);border-radius:14px;padding:18px}
     .card h3{margin:0 0 8px;font-size:1.05rem;color:#e6f7ff}
     .card p{margin:0;color:#c8d3dc;font-size:.95rem;line-height:1.6}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}
-    .badge{display:inline-block;font-size:.8rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:#9cc7ff;background:#0b1a2a}
+    .sub{margin-top:6px;color:#9bb3c7;font-size:.9rem}
+    
+    /* 선점, 비선점 카드 스타일 */
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}
+
+    /* 선점, 비선점, 알고리즘 표시 배지 */
+    .badge{
+        display:inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size:.8rem;
+        padding:4px 10px;
+        line-height: 1;
+        border-radius:999px;
+        border:1px solid var(--line);
+        color:#9cc7ff;
+        background:#0b1a2a;
+        vertical-align: middle;
+    }
+    /* 목록 스타일 */
     .list{margin:10px 0 0 0;padding-left:18px;color:#c8d3dc}
     .list li{margin:6px 0}
-    .glossary{margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+    /* WT, RT, BT, TAT 카드 스타일 */
+    .glossary{margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
     .term{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px}
     .term h4{margin:0 0 6px;font-size:1rem;color:#e6f7ff}
     .meta{font-size:.83rem;color:var(--muted)}
-    .algos{margin-top:32px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .when{margin-top:6px;color:#9bb3c7;font-size:.9rem}
+  
+    .algos{margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
     .algo{background:linear-gradient(180deg,#0e0e0e 0%,#0f0f14 100%);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
     .algo h5{margin:0;font-size:1rem;color:#e6f7ff}
     .algo p{margin:0;color:#c8d3dc;font-size:.93rem;line-height:1.5}
     .cta{margin-top:auto;align-self:flex-start;background:transparent;color:var(--accent);border:1px solid rgba(0,191,255,.35);padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .2s ease}
     .cta:hover{background:rgba(0,191,255,.08);border-color:rgba(0,191,255,.6)}
+  
     hr.sep{border:none;border-top:1px solid var(--line);margin:26px 0;opacity:.6}
-    @media (max-width:960px){nav{gap:36px}.hero,.cards-3,.two,.glossary,.algos{grid-template-columns:1fr}}
+  
+    @media (max-width:960px){
+      .hero{grid-template-columns:1fr}
+    }
+  
+    /* =======================
+       그래픽 애니메이션(그림)
+       ======================= */
+    .panel-cpu{position:relative;overflow:hidden}
+    .spinner{transform-origin:200px 150px;animation:spin 16s linear infinite}
+    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .queue-rail{fill:none;stroke:rgba(0,191,255,.35);stroke-width:2;stroke-dasharray:6 6}
+    .queue-rail-arrow{fill:rgba(0,191,255,.55)}
+    .arm{stroke:#00bfff;stroke-width:6;stroke-linecap:round;opacity:.9}
+    .proc{fill:#00bfff;stroke:#0090ff;stroke-width:1.5;transition:transform .2s ease,fill .2s ease}
+    .pid{font-size:14px;fill:#fff;font-weight:800;pointer-events:none}
   </style>
 </head>
 <body>
-<header>
-  <div class="logo">OS Platform</div>
-  <nav>
-    <!-- 링크 실제 이동으로 수정 -->
-    <div class="dropdown">
-      <span>Learn</span>
-      <div class="dropdown-content">
-        <a href="/learn-scheduling.html">스케줄링</a>
-        <a href="/learn-paging.html">페이지교체</a>
-        <a href="/learn-deadlock.html">데드록</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <span>Simulator</span>
-      <div class="dropdown-content">
-        <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
-        <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
-        <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <span><a href="/compare.html" style="color:#fff;text-decoration:none">Compare</a></span>
-    </div>
-    <div class="dropdown">
-      <span><a href="/graph-scheduling.html" style="color:#fff;text-decoration:none">Graph</a></span>
-    </div>
-  </nav>
-  <div class="actions">
-    <div id="authArea"></div>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="eyebrow">LEARN / CPU Scheduling</div>
-  <h1>CPU 스케줄링이란?</h1>
-  <div class="lead">여러 프로세스 중 누구에게 <b>CPU</b>를 얼마나, 어떤 기준으로 배정할지 결정하는 운영체제의 핵심 기능입니다. 목표는 시스템의 <b>효율</b>, <b>공정</b>, <b>안정</b>을 동시에 만족하는 것.</div>
-
-  <div class="hero">
-    <div>
-      <div class="cards-3">
-        <div class="card">
-          <h3>효율성</h3>
-          <p>유휴 시간을 최소화하고 <b>CPU 이용률</b>과 <b>처리량</b>을 높입니다.</p>
-        </div>
-        <div class="card">
-          <h3>공정성</h3>
-          <p>모든 작업이 <b>기아(Starvation)</b> 없이 적절한 기회를 얻도록 합니다.</p>
-        </div>
-        <div class="card">
-          <h3>안정성</h3>
-          <p>응답 시간의 예측 가능성과 시스템 전반의 <b>일관성</b>을 보장합니다.</p>
+  <header>
+    <div class="logo">OS Platform</div>
+    <nav>
+      <!-- 드롭다운: Learn -->
+      <div class="dropdown">
+        <span>Learn</span>
+        <div class="dropdown-content">
+          <a href="/learn-scheduling.html">스케줄링</a>
+          <a href="/learn-paging.html">페이지교체</a>
+          <a href="/learn-deadlock.html">데드록</a>
         </div>
       </div>
+      <!-- 드롭다운: Simulator -->
+      <div class="dropdown">
+        <span>Simulator</span>
+        <div class="dropdown-content">
+          <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
+          <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
+          <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <span><a href="/compare.html" style="color:#fff;text-decoration:none">Compare</a></span>
+      </div>
+      <div class="dropdown">
+        <span><a href="/graph-scheduling.html" style="color:#fff;text-decoration:none">Graph</a></span>
+      </div>
+    </nav>
+    <div class="actions"><div id="authArea"></div></div>
+  </header>
+
+  <div class="wrap">
+    <div class="eyebrow">LEARN / CPU Scheduling</div>
+    <h1>CPU 스케줄링이란?</h1>
+    <div class="lead">
+      CPU는 <b>한 번에 하나의 프로세스만 </b>실행할 수 있습니다.<br>
+      여러 프로세스가 동시에 CPU 사용을 요청할 때,
+      누구에게 먼저 CPU를 배정할지 정하는 과정을 <b>CPU 스케줄링</b>이라고 합니다.
     </div>
 
-    <div class="panel" aria-label="CPU panel">
-      <svg class="cpu-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img">
-        <defs>
-          <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <circle cx="200" cy="150" r="58" fill="#e8f6ff" stroke="#00bfff" stroke-width="6" filter="url(#glow)"/>
-        <text x="200" y="155" text-anchor="middle" font-size="22" font-weight="700" fill="#003b5f">CPU</text>
-        <g stroke="#00bfff" stroke-width="6">
-          <line x1="200" y1="88" x2="200" y2="38"/>
-          <line x1="200" y1="212" x2="200" y2="262"/>
-          <line x1="142" y1="150" x2="92"  y2="150"/>
-          <line x1="258" y1="150" x2="308" y2="150"/>
-          <line x1="166" y1="112" x2="124" y2="80"/>
-          <line x1="234" y1="112" x2="276" y2="80"/>
-          <line x1="166" y1="188" x2="124" y2="220"/>
-          <line x1="234" y1="188" x2="276" y2="220"/>
-        </g>
-        <g fill="#00bfff" class="node">
-          <circle cx="200" cy="34" r="10"/><circle cx="200" cy="266" r="10"/>
-          <circle cx="88"  cy="150" r="10"/><circle cx="312" cy="150" r="10"/>
-          <circle cx="118" cy="76"  r="10"/><circle cx="282" cy="76"  r="10"/>
-          <circle cx="118" cy="224" r="10"/><circle cx="282" cy="224" r="10"/>
-        </g>
-      </svg>
+    <h2 class="md">핵심 목표</h2>
+    <div class="hero">
+      <!-- 왼쪽: 카드들 -->
+      <div>
+        <div class="cards-3">
+          <div class="card">
+            <h3>효율성</h3>
+            <p>CPU가 더 많은 일을 <b>낮은 유휴 시간</b>으로 처리하게 합니다.</p>
+            <div class="sub">• Issue : CPU가 쉬는 시간이 길면 전체 성능이 저하됨.</div>
+          </div>
+          <div class="card">
+            <h3>공정성</h3>
+            <p>모든 작업이 <b>기아 상태 없이</b> 적절한 기회를 얻도록 합니다.</p>
+            <div class="sub">• Issue : 일부 작업이 계속 밀리면 기아가 발생함.</div>
+          </div>
+          <div class="card">
+            <h3>안정성</h3>
+            <p><b>예측 가능한 응답</b>과 <b>일관된 성능</b>을 유지하게 합니다</p>
+            <div class="sub">• Issue : 응답 속도가 일정하지 않으면 시스템 신뢰성이 떨어짐.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: CPU 패널 -->
+      <div class="panel panel-cpu" aria-label="CPU visual only">
+        <svg id="cpuViz" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- 중앙 CPU -->
+          <g id="cpuCore">
+            <circle cx="200" cy="150" r="58" fill="#e8f6ff" stroke="#00bfff" stroke-width="6" filter="url(#glow)"/>
+            <text x="200" y="157" text-anchor="middle" font-size="26" font-weight="800" fill="#003b5f">CPU</text>
+          </g>
+
+          <!-- 회전 그룹 -->
+          <g class="spinner">
+            <!-- 0° -->
+            <g class="arm-wrap" transform="rotate(0 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P1</text>
+            </g>
+            <!-- 45° -->
+            <g class="arm-wrap" transform="rotate(45 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P2</text>
+            </g>
+            <!-- 90° -->
+            <g class="arm-wrap" transform="rotate(90 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P3</text>
+            </g>
+            <!-- 135° -->
+            <g class="arm-wrap" transform="rotate(135 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P4</text>
+            </g>
+            <!-- 180° -->
+            <g class="arm-wrap" transform="rotate(180 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P5</text>
+            </g>
+            <!-- 225° -->
+            <g class="arm-wrap" transform="rotate(225 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P6</text>
+            </g>
+            <!-- 270° -->
+            <g class="arm-wrap" transform="rotate(270 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P7</text>
+            </g>
+            <!-- 315° -->
+            <g class="arm-wrap" transform="rotate(315 200 150)">
+              <line x1="200" y1="80" x2="200" y2="30" class="arm"/>
+              <circle cx="200" cy="30" r="14" class="proc"/>
+              <text x="200" y="30" text-anchor="middle" dominant-baseline="middle" class="pid">P8</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div> <!-- 삭제 금지 -->
+
+    <hr class="sep" />
+
+    
+    <h2 class="md">CPU 스케줄링 방식 구분</h2>
+    <div class="sub">CPU 스케줄링은 <b>작업 교체 가능 여부</b>에 따라 2가지로 나뉩니다. 운영체제가 실행 중인 작업을 뺏을 수 있는가, 없는가가 핵심입니다.</div>
+
+    <div class="two">
+      <div class="card">
+        <span class="badge">선점형 (Preemptive)</span>
+        <ul class="list">
+          <li>실행 중인 프로세스를 운영체제가 <b>강제로 중단</b>하고 CPU를 다른 프로세스에 할당하는 방식</li>
+          <li>긴급한 작업이나 짧은 작업이 먼저 처리되는 구조</li>
+          <li><b>SRT, RR, 선점형 Priority</b> 등으로 구현되는 방식</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="badge">비선점형 (Non-preemptive)</span>
+        <ul class="list">
+          <li>CPU를 점유한 프로세스가 <b>자발적으로 종료하거나 대기 상태로 전환될 때까지</b> 유지되는 방식</li>
+          <li>긴 작업이 앞서면 대기가 증가하기 때문에 <b>단순하지만 비효율적</b></li>
+          <li><b>FCFS, SJF</b> 등으로 동작하는 방식</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="md">프로세스 시간 흐름</h2>
+    <div class="sub">프로세스 도착 → 대기 (WT) → 첫 실행 (RT) → 실행 중 (BT) → 완료까지 (TAT)</div>
+    <div class="glossary">
+      <div class="term">
+        <h4>WT (Wating Time)</h4>
+        <br>
+        <div class="meta"><b>대기 시간</b>, 프로세스가 Ready Queue에서 CPU를 기다린 총 시간</div>
+        
+      </div>
+      <div class="term">
+        <h4>RT (Response Time)</h4>
+        <br>
+        <div class="meta"><b>응답 시간</b>, 프로세스가 도착한 순간부터 처음으로 CPU를 배정받을 때까지 걸린 시간</div>
+        
+      </div>
+      <div class="term">
+        <h4>BT (Burst Time)</h4>
+        <br>
+        <div class="meta"><b>실행 시간</b>, 프로세스가 CPU를 사용한 순수 실행 시간</div>
+        
+      </div>
+      <div class="term">
+        <h4>TAT (TurnAroundTime) (=WT+BT)</h4>
+        <br>
+        <div class="meta"><b>반환 시간</b>, 도착부터 완료까지 걸린 전체 시간</div>
+        
+      </div>
+    </div>
+
+    <h2 class="md">스케줄링 알고리즘</h2>
+    <div class="sub">
+        이 알고리즘들은 여러 작업 중 어떤 것을 먼저 실행할지 결정하는 역할을 합니다.<br>
+        각기 다른 기준으로 CPU를 배분하며, 어떤 순서로 실행하느냐에 따라 시스템의 응답성과 효율에 영향을 줍니다.
+    </div>
+    <div class="algos">
+      <div class="algo">
+        <h3 class="md">FCFS<br>(First Come First Served) </h3><span class="badge">비선점 (Non-Preemptive)</span>
+        <p>도착한 순서대로 CPU를 배정하는 방식. 단순하지만 긴 작업이 앞서면 뒤쪽 작업의 대기 시간이 길어질 수 있음.</p>
+        <button class="cta" onclick="goSim('fcfs')">시뮬레이터에서 확인 →</button>
+      </div>
+      <div class="algo">
+        <h3 class="md">SJF<br>(Shortest Job First) </h3><span class="badge">비선점 (Non-Preemptive)</span>
+        <p>예상 실행 시간이 가장 짧은 작업을 먼저 처리하는 방식. 평균 대기 시간을 최소화하지만 긴 작업이 기아 상태(Starvation)로 빠뜨릴 수 있음.</p>
+        <button class="cta" onclick="goSim('sjf')">시뮬레이터에서 확인 →</button>
+      </div>
+      <div class="algo">
+        <h3 class="md">RR<br>(Round Robin) </h3><span class="badge">선점 (Preemptive)</span>
+        <p>모든 작업에 동일한 시간 할당량을 주고 순환하며 실행. 공평하지만 너무 짧은 시간은 잦은 교체로 오버헤드를 유발</p>
+        <button class="cta" onclick="goSim('rr')">시뮬레이터에서 확인 →</button>
+      </div>
+      <div class="algo">
+        <h3 class="md">SRT<br>(Shortest Remaining Time) </h3><span class="badge">선점 (Preemptive)</span>
+        <p>남은 실행 시간이 가장 짧은 작업을 우선 실행. 빠른 응답이 가능하지만 잦은 교체와 긴 작업이 기아 상태(Starvation)로 빠뜨릴 수 있음.</p>
+        <button class="cta" onclick="goSim('srt')">시뮬레이터에서 확인 →</button>
+      </div>
     </div>
   </div>
+  
 
-  <hr class="sep" />
+  <script>
+    // =========================
+    // 1) CPU 오브젝트 
+    // =========================
+    (function() {
+      const panel = document.querySelector('.panel-cpu');
+      const svg   = document.getElementById('cpuViz');
+      if (!panel || !svg) return;
 
-  <div class="two">
-    <div class="card">
-      <span class="badge">선점형 (Preemptive)</span>
-      <ul class="list">
-        <li>실행 중인 프로세스라도 <b>더 높은 우선순위/더 짧은 남은시간</b>이 오면 <b>강제 중단</b> 가능</li>
-        <li>짧은 응답시간에 유리 — 예: <b>SRT, RR</b></li>
-        <li class="meta">컨텍스트 스위칭 오버헤드가 존재</li>
-      </ul>
-    </div>
-    <div class="card">
-      <span class="badge">비선점형 (Non-preemptive)</span>
-      <ul class="list">
-        <li>CPU를 잡은 프로세스가 <b>자발적으로</b> 양보할 때까지 유지</li>
-        <li>오버헤드가 낮고 단순 — 예: <b>FCFS, SJF</b></li>
-        <li class="meta">긴 작업이 앞에 오면 대기시간 증가(Convoy effect)</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="glossary">
-    <div class="term"><h4>WT (대기시간)</h4><div class="meta">Ready Queue에서 기다린 총 시간</div></div>
-    <div class="term"><h4>RT (응답시간)</h4><div class="meta">도착 → 첫 실행까지 걸린 시간</div></div>
-    <div class="term"><h4>BT (버스트시간)</h4><div class="meta">CPU가 실제로 작업한 시간</div></div>
-    <div class="term"><h4>TAT (반환시간)</h4><div class="meta">도착 → 완료까지 총 소요</div></div>
-  </div>
-
-  <div class="algos">
-    <div class="algo">
-      <h5>FCFS</h5>
-      <p>먼저 온 작업부터 처리. 단순하지만 긴 작업이 앞에 오면 대기 폭증.</p>
-      <button class="cta" onclick="goSim('fcfs')">시뮬레이터에서 확인 →</button>
-    </div>
-    <div class="algo">
-      <h5>SJF</h5>
-      <p>버스트시간이 짧은 순. 평균 대기시간을 최소화(이론상)하나 <i>기아</i> 가능.</p>
-      <button class="cta" onclick="goSim('sjf')">시뮬레이터에서 확인 →</button>
-    </div>
-    <div class="algo">
-      <h5>RR</h5>
-      <p>고정 <i>Time Slice</i> 만큼 차례대로 할당. 대화형 시스템에 적합.</p>
-      <button class="cta" onclick="goSim('rr')">시뮬레이터에서 확인 →</button>
-    </div>
-    <div class="algo">
-      <h5>SRT</h5>
-      <p>남은 시간이 가장 짧은 작업 우선(선점형). 빠른 응답, 스위칭 비용↑.</p>
-      <button class="cta" onclick="goSim('srt')">시뮬레이터에서 확인 →</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // 로그인/프로필 버튼 유지
-  document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('authArea');
-    const user = sessionStorage.getItem('user');
-    if (user && user.trim() !== '') {
-      container.innerHTML = `
-        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
-          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-          </svg>
-        </button>`;
-    } else {
-      container.innerHTML = `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
-    }
-  });
-
-  // 시뮬레이터 이동 (알림 → 실제 이동)
-  function goSim(type){
-    // 예: /sim-scheduling.html?algo=fcfs
-    location.href = '/sim-scheduling.html?algo=' + encodeURIComponent(type);
-  }
-
-  // 리액트(3000)에서 열렸을 때는 8080 정적 페이지로 강제 이동하도록(라우터 가로채기 우회)
-  (function () {
-    if (location.port === "3000") {
-      document.querySelectorAll('.dropdown-content a').forEach(a => {
-        const href = a.getAttribute('href');
-        if (href && href.startsWith('/')) {
-          a.addEventListener('click', function(e){
-            e.preventDefault();
-            window.location.assign('http://localhost:8080'+href);
-          });
-        }
+      panel.addEventListener('mousemove', (e)=>{
+        const rect = panel.getBoundingClientRect();
+        const rx = ((e.clientX-rect.left)/rect.width  - 0.5) * 8;
+        const ry = ((e.clientY-rect.top )/rect.height - 0.5) * -8;
+        svg.style.transform = `perspective(700px) rotateY(${rx}deg) rotateX(${ry}deg)`;
       });
+      panel.addEventListener('mouseleave', ()=> { svg.style.transform = ''; });
+    })();
+  
+    // =========================
+    // 2) 로그인/프로필 버튼 
+    // =========================
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('authArea');
+      if (!container) return;
+      const user = sessionStorage.getItem('user');
+  
+      if (user && user.trim() !== '') {
+        container.innerHTML = `
+          <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+            <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+            </svg>
+          </button>`;
+      } else {
+        container.innerHTML = `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+      }
+    });
+  
+    // =========================
+    // 3) 시뮬레이터 이동
+    // =========================
+    function goSim(type){
+      location.href = '/sim-scheduling.html?algo=' + encodeURIComponent(type);
     }
-  })();
-</script>
+  
+    // =========================
+    // 4) 리액트(3000)에서 8080 강제 전환
+    // =========================
+    (function () {
+      if (location.port === '3000') {
+        document.querySelectorAll('.dropdown-content a').forEach(a => {
+          const href = a.getAttribute('href');
+          if (href && href.startsWith('/')) {
+            a.addEventListener('click', function(e){
+              e.preventDefault();
+              window.location.assign('http://localhost:8080' + href);
+            });
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

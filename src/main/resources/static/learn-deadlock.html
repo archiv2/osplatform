@@ -1,10 +1,611 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn | Deadlock - OS Platform</title>
+  <style>
+    :root{
+      --bg:#000;--bg-2:#0a0a0a;--panel:#111;--panel-2:#131313;--line:#222;
+      --text:#fff;--muted:#b9c2cc;--accent:#00bfff;--btn:#0078ff;--btn-hover:#005ec9;
+      --ok:#0ecb81;--warn:#ffcc00;--bad:#ff5c5c;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
+
+    /* header (다른 Learn 페이지와 공통) */
+    header{
+      position:sticky;top:0;z-index:20;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)
+    }
+    .logo{font-size:1.4em;font-weight:700;color:var(--accent)}
+    nav{display:flex;align-items:center;gap:150px}
+    .dropdown{position:relative;display:inline-block;padding:6px 0;cursor:pointer}
+    .dropdown::after{
+      content:" ⌄";display:inline-block;font-size:.8em;color:#ccc;
+      transition:transform .25s ease,color .25s ease
+    }
+    .dropdown:hover::after{transform:rotate(180deg);color:var(--accent)}
+    .dropdown-content{
+      display:none;position:absolute;background:#111;min-width:180px;
+      box-shadow:0 8px 16px rgba(0,0,0,.3);z-index:10
+    }
+    .dropdown-content a{
+      color:#fff;padding:10px 14px;text-decoration:none;display:block
+    }
+    .dropdown-content a:hover{background:#333}
+    .dropdown:hover .dropdown-content{display:block}
+    .dropdown > span > a{color:#fff;text-decoration:none}
+    .actions{display:flex;align-items:center;gap:20px}
+    #authArea{}
+    @media (max-width:880px){
+      header{padding:16px 20px;flex-wrap:wrap;gap:12px}
+      nav{gap:40px}
+    }
+
+    /* layout */
+    .wrap{
+      max-width:1150px;margin:0 auto;
+      padding:40px 24px 120px;
+      overflow-x:hidden;
+    }
+    .eyebrow{font-size:.9rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+    h1{margin:.25rem 0 0;font-size:2.2rem;line-height:1.2}
+    .lead{margin-top:12px;color:#d7e2ea;line-height:1.7;font-size:.98rem}
+
+    /* markdown-like headings */
+    h2.md{font-size:1.6rem;margin:34px 0 14px}
+    h2.md::before{content:"\25C6";display:inline-block;margin-right:8px;color:#34b4ff;vertical-align:middle}
+    h3.md{font-size:1.15rem;margin:12px 0 8px;color:#9cc7ff}
+    h3.md::before{content:"\25C6";display:inline-block;margin-right:6px;color:#34b4ff;vertical-align:middle}
+
+    .hero{
+      display:grid;
+      grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
+      gap:32px;align-items:center;margin-top:24px;margin-bottom:20px;
+    }
+    .hero-text{font-size:.96rem;color:#d7e2ea;line-height:1.7}
+    .panel{
+      background:radial-gradient(130% 150% at 90% 0%,#163c5f 0%,#050509 60%);
+      border:1px solid var(--line);border-radius:16px;
+      padding:22px;min-height:260px;
+      display:flex;align-items:center;justify-content:center;width:100%;
+    }
+
+    /* Resource Allocation Graph 간단 그림 */
+    .rag-title{font-size:14px;fill:#cfeaff}
+    .rag-node-p{fill:#1b2a3a;stroke:#4f86ff;stroke-width:1.4}
+    .rag-node-r{fill:#281826;stroke:#ff9ad9;stroke-width:1.4}
+    .rag-label{fill:#e6f7ff;font-size:11px}
+    .rag-edge{stroke:#ffffff;stroke-width:1.6;marker-end:url(#arrowWhite)}
+    .rag-dead{stroke:var(--bad);stroke-width:2;stroke-dasharray:5 5;marker-end:url(#arrowRed)}
+
+    /* 공통 카드 */
+    .cards-3{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:16px;margin:18px 0 10px
+    }
+    .cards-4{
+      display:grid;grid-template-columns:repeat(4,1fr);
+      gap:16px;margin:18px 0 10px
+    }
+    .card{
+      background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+      border:1px solid var(--line);border-radius:14px;padding:18px
+    }
+    .card h3{margin:0 0 8px;font-size:1.05rem;color:#e6f7ff}
+    .card p{margin:0;color:#c8d3dc;font-size:.93rem;line-height:1.6}
+    .card .tag{
+      display:inline-flex;align-items:center;justify-content:center;
+      margin-bottom:6px;font-size:0.95rem;padding:4px 11px;
+      border-radius:999px;border:1px solid var(--line);
+      color:#9cc7ff;background:#0b1a2a
+    }
+    .sub{margin-top:6px;color:#9bb3c7;font-size:.9rem}
+    .muted{color:#9bb3c7;font-size:.92rem}
+
+    @media (max-width:960px){
+      .hero{grid-template-columns:1fr}
+      .cards-3{grid-template-columns:1fr}
+      .cards-4{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:640px){
+      .cards-4{grid-template-columns:1fr}
+    }
+
+    hr.sep{border:none;border-top:1px solid var(--line);margin:30px 0;opacity:.6}
+
+    /* Deadlock 자원 / 조건 섹션 */
+    .two-col{
+      display:grid;grid-template-columns:1.4fr 1fr;
+      gap:20px;align-items:flex-start
+    }
+    .pill-list{margin:0;padding-left:18px;color:#c8d3dc;font-size:.94rem;line-height:1.7}
+    .pill{
+      display:inline-flex;align-items:center;margin:4px 6px 0 0;
+      padding:4px 10px;border-radius:999px;border:1px solid var(--line);
+      font-size:.8rem;color:#d7e2ea;background:#141820
+    }
+    @media (max-width:880px){
+      .two-col{grid-template-columns:1fr}
+    }
+
+    /* 전략 섹션 */
+    .strategy-grid{
+      display:grid;grid-template-columns:repeat(2,1fr);
+      gap:18px;margin-top:12px
+    }
+    .strategy{
+      background:linear-gradient(160deg,#111 0%,#151925 40%,#050509 100%);
+      border-radius:16px;border:1px solid var(--line);
+      padding:18px 18px 16px
+    }
+    .strategy-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .strategy h3{margin:0;font-size:1.05rem;color:#e6f7ff}
+    .strategy-tag{
+      font-size:.78rem;padding:3px 9px;border-radius:999px;
+      border:1px solid var(--line);background:#101820;color:#9cc7ff
+    }
+    .strategy p{margin:4px 0 6px;color:#c8d3dc;font-size:.93rem;line-height:1.6}
+    .strategy ul{margin:4px 0 0 18px;padding:0;color:#c8d3dc;font-size:.9rem;line-height:1.55}
+    .strategy li + li{margin-top:3px}
+    @media (max-width:960px){
+      .strategy-grid{grid-template-columns:1fr}
+    }
+
+    .note-box{
+      margin-top:10px;padding:10px 12px;border-radius:10px;
+      border:1px dashed #33495f;background:#070a10;
+      color:#9bb3c7;font-size:.87rem
+    }
+    .highlight{color:#ffd27f}
+  </style>
 </head>
 <body>
+<header>
+  <div class="logo">OS Platform</div>
+  <nav>
+    <!-- Learn -->
+    <div class="dropdown">
+      <span>Learn</span>
+      <div class="dropdown-content">
+        <a href="/learn-scheduling.html">스케줄링</a>
+        <a href="/learn-paging.html">페이지교체</a>
+        <a href="/learn-deadlock.html">데드록</a>
+      </div>
+    </div>
 
+    <!-- Simulator -->
+    <div class="dropdown">
+      <span>Simulator</span>
+      <div class="dropdown-content">
+        <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
+        <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
+        <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
+      </div>
+    </div>
+
+    <!-- Compare (링크만) -->
+    <div class="dropdown">
+      <span>
+        <a href="/compare.html" style="color:#fff;text-decoration:none">
+          Compare
+        </a>
+      </span>
+    </div>
+
+    <!-- Graph (링크만) -->
+    <div class="dropdown">
+      <span>
+        <a href="/graph-deadlock.html" style="color:#fff;text-decoration:none">
+          Graph
+        </a>
+      </span>
+    </div>
+  </nav>
+
+  <div class="actions">
+    <div id="authArea"></div>
+  </div>
+</header>
+
+
+
+<div class="wrap">
+  <div class="eyebrow">LEARN / Deadlock</div>
+  <h1>Deadlock(교착상태)이란?</h1>
+  <div class="lead">
+    프로세스 A가 자원 1을 들고 자원 2를 기다리고 있고,<br>
+    프로세스 B가 자원 2를 들고 자원 1을 기다린다면 둘 다 영원히 깨어나지 못합니다.<br>
+    이렇게 <b>여러 프로세스가 서로가 쥔 자원을 기다리며 무한 대기에 빠진 상태</b>를 <b>교착상태(Deadlock)</b>라고 합니다.
+  </div>
+
+  <!-- Hero: 정의 + Resource Allocation Graph 예시 -->
+  <div class="hero">
+    <div class="hero-text">
+      <p>
+        Resource Allocation Graph는 프로세스(<b>P</b>)와 자원 타입(<b>R</b>) 사이의 상태를 나타내는 그림입니다.
+      </p>
+      <p>
+        왼쪽 그림에서는 R₁, R₂ 안에 여러 개의 ● 이 있어, 인스턴스가 여유 있게 존재합니다.
+        R₁의 인스턴스는 P₁에게, R₂의 인스턴스는 P₂와 P₃에게 각각 할당되어 있고,
+        P₂가 R₁을 추가로 요청하더라도 전체 자원이 부족하지 않아 언젠가는 모든 프로세스가 자원을 받아 일을 계속 할 수 있습니다.
+        즉, 모든 프로세스가 동시에 막혀버리는 순환 구조는 없으므로 이 상태는 교착 상태라고 볼 수 없습니다.
+      </p>
+      <p>
+        오른쪽 그림에서는 R₁과 R₂가 각각 인스턴스를 1개씩만 가지고 있습니다.
+        R₁은 P₁에게, R₂는 P₂는 이미 할당된 상태에서,
+        P₁은 R₂를, P₂는 R₁을 서로 추가로 요청하고 있습니다.
+        이로써 프로세스와 자원이 원을 이루며 서로를 기다리는 순환 구조가 만들어지고,
+        누구도 자원을 반납하지 못하는 <b>전형적인 교착 상태(Deadlock)</b>가 됩니다.
+      </p>
+    </div>
+
+    <div class="panel">
+      <svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-label="Resource Allocation Graph with and without Deadlock">
+
+        <!-- ▼ 화살표 정의 -->
+        <defs>
+          <marker id="arrowWhite" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <polygon points="0 0, 9 3, 0 6" fill="#ffffff"/>
+          </marker>
+          <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <polygon points="0 0, 9 3, 0 6" fill="#ff5c5c"/>
+          </marker>
+        </defs>
+
+        <!-- ▼ 중앙 상단 제목 -->
+        <text x="250" y="13" text-anchor="middle"
+              style="font: size 25px; fill:#ffffff; font-weight:700;">
+          Resource Allocation Graph
+        </text>
+
+        <!-- ▼ 좌/우 구역 제목 -->
+        <text x="110" y="55" text-anchor="middle"
+              style="fill:#9cc7ff; font-size:12px;">
+          Deadlock 상태가 아닌 경우
+        </text>
+
+        <text x="370" y="55" text-anchor="middle"
+              style="fill:#ff9f9f; font-size:12px;">
+          Deadlock 상태인 경우
+        </text>
+
+        <!-- ▼ 가운데 점선 구분선 -->
+        <line x1="250" y1="40" x2="250" y2="250"
+              stroke="#666" stroke-width="1" stroke-dasharray="5 5" opacity="0.6"/>
+
+        <!-- ▼ 왼쪽(Deadlock 아님) - 자원 -->
+        <g>
+          <!-- R1 -->
+          <rect x="50" y="70" width="55" height="42" rx="6" stroke="#ffb3ff" fill="#331a33"/>
+          <text x="78" y="88" text-anchor="middle" fill="#fff">R₁</text>
+          <circle cx="63" cy="100" r="3" fill="#fff"/>
+          <circle cx="76" cy="100" r="3" fill="#fff"/>
+          <circle cx="89" cy="100" r="3" fill="#fff"/>
+
+          <!-- R2 -->
+          <rect x="50" y="135" width="55" height="42" rx="6" stroke="#ffb3ff" fill="#331a33"/>
+          <text x="78" y="153" text-anchor="middle" fill="#fff">R₂</text>
+          <circle cx="63" cy="165" r="3" fill="#fff"/>
+          <circle cx="76" cy="165" r="3" fill="#fff"/>
+        </g>
+
+        <!-- ▼ 왼쪽 프로세스 -->
+        <g>
+          <circle cx="190" cy="80" r="18" stroke="#6aa8ff" fill="#0b1a2a"/>
+          <text x="190" y="84" text-anchor="middle" fill="#fff">P₁</text>
+
+          <circle cx="190" cy="140" r="18" stroke="#6aa8ff" fill="#0b1a2a"/>
+          <text x="190" y="144" text-anchor="middle" fill="#fff">P₂</text>
+
+          <circle cx="190" cy="200" r="18" stroke="#6aa8ff" fill="#0b1a2a"/>
+          <text x="190" y="204" text-anchor="middle" fill="#fff">P₃</text>
+        </g>
+
+        <!-- ▼ 왼쪽 엣지 -->
+        <line x1="105" y1="85" x2="162" y2="80" stroke="#fff" stroke-width="2" marker-end="url(#arrowWhite)"/>
+        <line x1="175" y1="130" x2="110" y2="105" stroke="#fff" stroke-width="2" marker-end="url(#arrowWhite)"/>
+        <line x1="105" y1="160" x2="160" y2="140" stroke="#fff" stroke-width="2" marker-end="url(#arrowWhite)"/>
+        <line x1="105" y1="175" x2="160" y2="200" stroke="#fff" stroke-width="2" marker-end="url(#arrowWhite)"/>
+
+        <!-- ▼ 오른쪽(Deadlock) - 자원 -->
+        <g>
+          <rect x="300" y="80" width="55" height="42" rx="6" stroke="#ffb3ff" fill="#331a33"/>
+          <text x="327" y="98" text-anchor="middle" fill="#fff">R₁</text>
+          <circle cx="327" cy="112" r="3" fill="#fff"/>
+
+          <rect x="300" y="150" width="55" height="42" rx="6" stroke="#ffb3ff" fill="#331a33"/>
+          <text x="327" y="168" text-anchor="middle" fill="#fff">R₂</text>
+          <circle cx="327" cy="182" r="3" fill="#fff"/>
+        </g>
+
+        <!-- ▼ 오른쪽 프로세스 -->
+        <g>
+          <circle cx="440" cy="100" r="18" stroke="#6aa8ff" fill="#0b1a2a"/>
+          <text x="440" y="104" text-anchor="middle" fill="#fff">P₁</text>
+
+          <circle cx="440" cy="170" r="18" stroke="#6aa8ff" fill="#0b1a2a"/>
+          <text x="440" y="174" text-anchor="middle" fill="#fff">P₂</text>
+        </g>
+
+        <!-- ▼ Deadlock 할당 엣지 -->
+        <line x1="355" y1="100" x2="415" y2="100" stroke="#fff" stroke-width="2" marker-end="url(#arrowWhite)"/>
+        <line x1="355" y1="170" x2="415" y2="170" stroke="#fff" stroke-width="2" marker-end="url(#arrowWhite)"/>
+
+        <!-- ▼ Deadlock 요청 엣지(빨간 점선) -->
+        <line x1="415" y1="100" x2="355" y2="170"
+              stroke="#ff5c5c" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowRed)"/>
+        <line x1="415" y1="170" x2="355" y2="100"
+              stroke="#ff5c5c" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowRed)"/>
+
+        <!-- ▼ 범례 (Legend) -->
+        <g transform="translate(50,255)">
+          <!-- 자원 -->
+          <rect x="0" y="0" width="26" height="18" rx="4" stroke="#ffb3ff" fill="#331a33"/>
+          <text x="40" y="13" fill="#fff" font-size="11">자원 (Resource)</text>
+        </g>
+
+        <g transform="translate(180,255)">
+          <!-- 프로세스 -->
+          <circle cx="15" cy="9" r="9" stroke="#6aa8ff" fill="#0b1a2a"/>
+          <text x="40" y="13" fill="#fff" font-size="11">프로세스 (Process)</text>
+        </g>
+
+        <g transform="translate(330,255)">
+          <!-- 인스턴스 ●  -->
+          <circle cx="8" cy="10" r="3" fill="#fff"/>
+          <circle cx="18" cy="10" r="3" fill="#fff"/>
+          <text x="40" y="13" fill="#fff" font-size="11">인스턴스 수</text>
+        </g>
+      </svg>
+    </div>
+
+  </div>
+
+
+  <!-- Block / Starvation / Deadlock 비교 -->
+  <h2 class="md">잠들어 있는 프로세스, 무엇이 다른가?</h2>
+  <div class="sub">겉보기에는 “프로세스가 멈췄다”로 보이지만, 내부 이유에 따라 의미가 완전히 달라집니다.</div>
+
+  <div class="cards-3">
+    <div class="card">
+      <div class="tag">Block/Asleep (대기 상태)</div>
+      <h3>자원을 기다리는 일시 중단 상태</h3>
+      <p>
+        프로세스가 어떤 <b>이벤트나 자원</b>을 기다리며 잠든 상태입니다.
+        디스크 I/O 완료, 잠시 다른 프로세스가 사용 중인 자원이 곧 해제되기를 기다리는 경우 등,
+        <b>기다리는 일이 실제로 일어날 수 있으면</b> 시간이 지나 다시 깨어날 수 있습니다.
+      </p>
+    </div>
+    <div class="card">
+      <div class="tag">Starvation (기아 상태)</div>
+      <h3>우선순위에서 밀려 실행 기회를 얻지 못하는 상태</h3>
+      <p>
+        준비 상태에서 계속 CPU를 기다리지만, <b>우선순위나 스케줄링 정책 탓</b>에
+        선택되지 못해 실행 기회를 받지 못하는 상태입니다.
+        자원은 언젠가 줄 수 있지만, <b>운이 나빠 계속 못 받는 상황</b>에 가깝습니다.
+      </p>
+    </div>
+    <div class="card">
+      <div class="tag">Deadlock (교착상태)</div>
+      <h3>조건이 풀리지 않아 영구 정지된 상태</h3>
+      <p>
+        더 이상 발생할 수 없는 이벤트를 기다리는 경우입니다.
+        서로 원하는 자원이 서로에게 할당된 채 <b>순환 구조</b>를 이루면,
+        그 자원이 <b>해제될 가능성 자체가 사라져</b> 영원히 깨어날 수 없는 Block 상태가 됩니다.
+      </p>
+    </div>
+  </div>
+
+  <hr class="sep" />
+
+  <!-- Deadlock을 일으키는 자원 -->
+  <h2 class="md">Deadlock에서 문제가 되는 자원</h2>
+  <div class="two-col">
+    <div>
+      <p class="muted">
+        “서로 잡고 있다가 안 놓는 자원”이 무엇인지가 핵심입니다.
+        여기서 말하는 자원은 단순한 하드웨어만이 아니라,
+        운영체제가 관리해야 하는 거의 모든 대상을 포함합니다.
+      </p>
+      <ul class="pill-list">
+        <li>입출력 장치 (디스크, 프린터, 네트워크 등)</li>
+        <li>CPU 코어, 메모리 공간, 버퍼</li>
+        <li>파일, 레코드, 데이터베이스 잠금</li>
+        <li>세마포어, 뮤텍스, 모니터 같은 동기화 객체</li>
+      </ul>
+      <p class="muted" style="margin-top:10px;">
+        데드록 관점에서는 특히 아래와 같은 특성을 가진 <b>재사용 가능한 자원</b>이 중요합니다.
+        한 번 쓰고 사라지는 자원(예: 메세지, 데이터 패킷)은 모델링이 복잡해
+        고전적인 데드록 모델에서는 보통 제외합니다.
+      </p>
+    </div>
+    <div>
+      <div class="card">
+        <div class="tag">데드록 관점에서 중요한 자원 특성</div>
+        <p><b>① 선점 불가능(Non-preemptible)</b><br>
+          운영체제가 강제로 빼앗을 수 없는 자원입니다.
+          자원을 가진 프로세스가 스스로 반납하지 않으면 회수가 불가능합니다.
+        </p>
+        <p><b>② 배타적 사용(Exclusive allocation)</b><br>
+          한 번에 하나의 프로세스만 사용할 수 있는 자원입니다.
+          다른 프로세스는 반드시 대기해야 하므로, 대기열이 서로 물리기 쉽습니다.
+        </p>
+        <p><b>③ 재사용 가능한 자원</b><br>
+          사용 후에도 다시 다른 프로세스에게 할당 가능한 자원입니다.
+          이 자원을 두고 여러 프로세스가 동시에 경쟁할 때 데드록 문제가 발생합니다.
+        </p>
+      </div>
+      <div style="margin-top:8px;">
+        <span class="pill">디스크·파일 잠금</span>
+        <span class="pill">메모리 페이지</span>
+        <span class="pill">뮤텍스·세마포어</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep" />
+
+  <!-- Deadlock 발생 4조건 -->
+  <h2 class="md">Deadlock 발생의 4가지 필요 조건</h2>
+  <div class="sub">이 네 가지가 <b>동시에</b> 성립해야 실제 Deadlock이 발생합니다.</div>
+
+  <div class="cards-4">
+    <div class="card">
+      <div class="tag">조건 1</div>
+      <h3>Mutual Exclusion (상호 배제)</h3>
+      <p>
+        특정 자원은 동시에 여러 프로세스가 사용할 수 없고,
+        한 프로세스가 점유하는 동안 다른 프로세스는 반드시 기다려야 합니다.
+        이러한 <b>배타적 자원</b>이 존재해야 Deadlock이 논의됩니다.
+      </p>
+    </div>
+    <div class="card">
+      <div class="tag">조건 2</div>
+      <h3>Hold and Wait (점유하며 대기)</h3>
+      <p>
+        프로세스가 이미 하나 이상의 자원을 가진 상태에서
+        <b>그 자원을 쥔 채로</b> 추가 자원을 요청하는 구조입니다.
+        이렇게 되면 각 프로세스가 서로 쥔 자원을 놓지 않은 채
+        <b>추가 자원을 기다리는 구도</b>가 만들어집니다.
+      </p>
+    </div>
+    <div class="card">
+      <div class="tag">조건 3</div>
+      <h3>Non-Preemption (비선점)</h3>
+      <p>
+        운영체제가 이미 할당된 자원을 <b>강제로 회수할 수 없는 특성</b>입니다.
+        자원을 가진 프로세스가 자발적으로 반납할 때까지 기다려야 하므로,
+        순환 구조가 형성되면 대기가 해소되지 않습니다.
+      </p>
+    </div>
+    <div class="card">
+      <div class="tag">조건 4</div>
+      <h3>Circular Wait (순환 대기)</h3>
+      <p>
+        프로세스들이 서로가 가진 자원을 <b>원형 구조로 대기</b>하는 상태입니다.
+        A는 B의 자원을, B는 C의 자원을, C는 다시 A의 자원을 기다리는 식의
+        순환이 생기면 Deadlock은 필연적으로 발생합니다.
+      </p>
+    </div>
+  </div>
+
+  <hr class="sep" />
+
+  <!-- 데드록 처리 전략 -->
+  <h2 class="md">데드록 처리 전략 한눈에 보기</h2>
+  <div class="sub">운영체제는 데드록을 <b>미리 막거나(Prevention/ Avoidance)</b>, <b>발생 후 정리하거나(Detection &amp; Recovery)</b>, <b>아예 무시</b>하기도 합니다.</div>
+
+  <div class="strategy-grid">
+    <!-- Prevention -->
+    <div class="strategy">
+      <div class="strategy-header">
+        <h3>1. Deadlock Prevention (예방)</h3>
+      </div>
+      <p>
+        데드록의 네 가지 필요 조건 중 적어도 하나가 성립하지 않도록
+        시스템 규칙을 미리 설계하는 방법입니다.
+        이론적으로는 깔끔하지만, <b>자원 활용률과 유연성이 떨어지기 쉬운</b> 방식입니다.
+      </p>
+      <ul>
+        <li><b>1-1. 상호 배제 완화</b> – 가능하다면 자원을 <b>공유 자원</b>으로 설계해 동시에 접근 허용.<br>
+          ☞ 대부분 자원은 본질적으로 배타적이라 적용 범위는 제한적.</li>
+        <li><b>1-2. Hold &amp; Wait 금지</b> – 프로세스가 시작할 때 필요한 자원을 <b>한꺼번에 요청</b>하게 하거나,
+          추가 자원이 필요하면 현재 자원을 <b>전부 반납 후 재요청</b>하도록 강제.<br>
+          ☞ Deadlock은 막지만, 사용하지 않는 자원을 오래 점유하고 재요청이 많아져 비효율적.</li>
+        <li><b>1-3. 비선점 허용</b> – 추가 자원을 즉시 줄 수 없으면, 이미 점유한 자원을 <b>운영체제가 강제로 회수</b>.<br>
+          ☞ CPU·메모리처럼 상태 저장이 쉬운 자원에 한해 부분적으로 사용.</li>
+        <li><b>1-4. 순환 대기 차단</b> – 모든 자원에 <b>전역 순서(번호)</b>를 부여하고,
+          번호가 증가하는 방향으로만 자원 요청을 허용.<br>
+          ☞ 순환이 불가능해지지만, 자원 요청 순서를 강제로 맞춰야 해 프로그램 유연성이 줄어듦.</li>
+      </ul>
+    </div>
+
+    <!-- Avoidance -->
+    <div class="strategy">
+      <div class="strategy-header">
+        <h3>2. Deadlock Avoidance (회피)</h3>
+      </div>
+      <p>
+        데드록이 <b>가능한 상황 자체를 차단</b>하는 것이 아니라,
+        매 자원 요청마다 “이 요청을 허용하면 위험해지는지”를 검사해
+        <b>위험한 상태(Unsafe State)에 들어가지 않도록</b> 할당을 조절합니다.
+      </p>
+      <ul>
+        <li><b>Safe State</b> – 현재 가용 자원과 각 프로세스의 최대 필요량을 고려했을 때,
+          모든 프로세스를 어떤 순서로든 <b>정상 종료시킬 수 있는 상태</b>.<br>
+          이때 존재하는 실행 가능한 순서를 <b>Safe Sequence</b>라고 합니다.</li>
+        <li><b>Unsafe State</b> – 반드시 Deadlock이 난다는 뜻은 아니지만,
+          Safe Sequence를 보장할 수 없어 <b>데드록이 발생할 가능성이 있는 상태</b>.</li>
+        <li><b>요청 처리 절차 (개념)</b><br>
+          (1) 요청 자원을 <b>가상으로 할당</b>했다고 가정 →<br>
+          (2) 그 상태가 아직도 Safe State인지 검사 →<br>
+          (3) Safe면 실제로 할당, Unsafe이면 <b>요청을 보류</b>.</li>
+        <li><b>대표 알고리즘</b><br>
+          – <b>Resource Allocation Graph Algorithm</b> (자원 인스턴스 1개일 때)<br>
+          – <b>Banker’s Algorithm</b> (다중 인스턴스 자원, 교과서 대표 알고리즘)</li>
+      </ul>
+      <div class="note-box">
+        Banker’s Algorithm에서는 각 프로세스가 자원별 최대 필요량(Max)을 미리 선언하고,
+        시스템이 <code>Allocation / Max / Need / Available</code> 테이블을 유지합니다.
+        Safe Sequence가 존재할 때만 실제 할당을 허용합니다.
+      </div>
+    </div>
+
+    <!-- Detection & Recovery -->
+    <div class="strategy">
+      <div class="strategy-header">
+        <h3>3. Deadlock Detection &amp; Recovery (탐지 및 회복)</h3>
+      </div>
+      <p>
+        데드록이 생길 수 있도록 운영하다가, <b>주기적으로 자원 상태를 검사</b>해
+        데드록이 발생했는지 확인하고, 발견되면 <b>프로세스를 죽이거나 자원을 회수</b>해
+        순환을 끊는 방식입니다.
+      </p>
+      <ul>
+        <li><b>Detection (탐지)</b><br>
+          – 자원 인스턴스 1개: Resource Allocation Graph에서 <b>Cycle 존재 여부</b>로 탐지,
+          또는 Wait-for Graph 사용.<br>
+          – 인스턴스 여러 개: Banker’s 알고리즘과 비슷하게
+          “더 이상 진행 가능한 프로세스가 있는지” 반복 검사하여,
+          끝까지 제거되지 않는 집합을 데드록 집합으로 판별.<br>
+          – 이 검사는 연산량이 크므로 <b>너무 자주 돌리면 오버헤드</b>가 큼.</li>
+        <li><b>Recovery (회복)</b><br>
+          – <b>프로세스 종료</b>: 데드록에 연루된 프로세스를 모두 한 번에 종료하거나,
+          하나씩 종료하면서 데드록이 풀리는 시점까지 반복.<br>
+          – <b>Resource Preemption</b>: 희생자(victim) 프로세스에서 자원을 빼앗아 다른 프로세스에 전달,
+          우선순위·진행 정도·Rollback 비용·Rollback 횟수 등을 기준으로 공정하게 선택.<br>
+          – <b>Checkpoint-Restart</b>: 중간중간 저장해둔 checkpoint로 일부 프로세스를 되돌린 뒤 재시작하여
+          데드록을 해소. 구현은 복잡하지만, <b>일부 작업을 살릴 수 있다는 장점</b>이 있습니다.</li>
+      </ul>
+    </div>
+
+    <!-- Ignorance -->
+    <div class="strategy">
+      <div class="strategy-header">
+        <h3>4. Deadlock Ignorance (무시)</h3>
+      </div>
+      <p>
+        놀랍게도, 대부분의 범용 운영체제는 데드록을 <b>시스템 차원에서 적극적으로 처리하지 않습니다.</b>
+        데드록이 드물게 일어나고, 이를 예방·회피하기 위한 알고리즘이
+        항상 자원 상태를 체크해야 하므로 <b>오버헤드가 너무 크기 때문</b>입니다.
+      </p>
+      <ul>
+        <li>운영체제는 별다른 조치를 하지 않고, 프로그램이 멈추거나 응답하지 않을 때
+          <b>사용자나 관리자가 직접 강제 종료·재시작</b>하는 방식에 의존합니다.</li>
+        <li>즉, “데드록이 존재할 수 있다는 사실은 인정하지만,
+          <b>그 비용을 OS가 대신 지지 않는다</b>”는 현실적인 선택입니다.</li>
+      </ul>
+      <div class="note-box">
+        실제 시스템에서는 <b>데드록 관리 비용 &gt; 데드록이 가끔 일어날 때의 피해</b>라고 보는 경우가 많습니다.
+        그래서 OS는 구조적 도움(타임아웃, 로그, 강제 종료 수단)을 제공하고,
+        세밀한 회피·예방은 <b>개발자와 애플리케이션 설계</b>에 맡기는 편입니다.
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
