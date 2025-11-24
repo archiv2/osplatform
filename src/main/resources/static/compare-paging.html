@@ -45,7 +45,7 @@
     .actions{display:flex;align-items:center;gap:20px}
     #authArea{}
 
-        .btn-row{
+    .btn-row{
       display:flex;
       gap:8px;
       margin-top:10px;
@@ -63,7 +63,6 @@
     .btn:hover{
       background:var(--btn-hover);
     }
-
 
     @media (max-width:880px){
       header{padding:16px 20px;flex-wrap:wrap;gap:12px}
@@ -260,396 +259,680 @@
   </style>
 </head>
 <body>
-  <header>
-    <a href="/index.html" class="logo">OS Platform</a>
+<header>
+  <a href="/index.html" class="logo">OS Platform</a>
 
-    <nav>
-      <!-- Learn -->
-      <div class="dropdown">
-        <span>Learn</span>
-        <div class="dropdown-content">
-          <a href="/learn-scheduling.html">CPU Scheduling</a>
-          <a href="/learn-paging.html">Page Replacement</a>
-          <a href="/learn-deadlock.html">Deadlock</a>
-        </div>
+  <nav>
+    <!-- Learn -->
+    <div class="dropdown">
+      <span>Learn</span>
+      <div class="dropdown-content">
+        <a href="/learn-scheduling.html">CPU Scheduling</a>
+        <a href="/learn-paging.html">Page Replacement</a>
+        <a href="/learn-deadlock.html">Deadlock</a>
       </div>
-
-      <!-- Simulator -->
-      <div class="dropdown">
-        <span>Simulator</span>
-        <div class="dropdown-content">
-          <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
-          <a href="/sim-paging.html">Page Replacement Simulator</a>
-          <a href="/sim-deadlock.html">Deadlock Simulator</a>
-        </div>
-      </div>
-
-      <!-- Compare -->
-      <div class="dropdown">
-        <span>Compare</span>
-        <div class="dropdown-content">
-          <a href="/compare-scheduling.html">Scheduling Algorithms Compare</a>
-          <a href="/compare-paging.html">Paging Algorithms Compare</a>
-        </div>
-      </div>
-
-    </nav>
-
-    <div class="actions">
-      <div id="authArea"></div>
     </div>
-  </header>
 
-  <main>
-    <h1>Page Replacement Algorithm Compare</h1>
-    <p class="subtitle">
-      페이지 교체 알고리즘 4개를 한눈에 비교해서 보거나,<br />
-      같은 참조 문자열·프레임 수에서 두 알고리즘의 <b>페이지 폴트 패턴</b>을 비교할 수 있습니다.
+    <!-- Simulator -->
+    <div class="dropdown">
+      <span>Simulator</span>
+      <div class="dropdown-content">
+        <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
+        <a href="/sim-paging.html">Page Replacement Simulator</a>
+        <a href="/sim-deadlock.html">Deadlock Simulator</a>
+      </div>
+    </div>
+
+    <!-- Compare -->
+    <div class="dropdown">
+      <span>Compare</span>
+      <div class="dropdown-content">
+        <a href="/compare-scheduling.html">Scheduling Algorithms Compare</a>
+        <a href="/compare-paging.html">Paging Algorithms Compare</a>
+      </div>
+    </div>
+
+  </nav>
+
+  <div class="actions">
+    <div id="authArea"></div>
+  </div>
+</header>
+
+<main>
+  <h1>Page Replacement Algorithm Compare</h1>
+  <p class="subtitle">
+    페이지 교체 알고리즘 4개를 한눈에 비교해서 보거나,<br />
+    같은 참조 문자열·프레임 수에서 두 알고리즘의 <b>페이지 폴트 패턴</b>을 비교할 수 있습니다.
+  </p>
+
+  <!-- 상단 고정 비교표 -->
+  <section class="panel">
+    <h2>알고리즘 한눈에 보기</h2>
+    <p class="sub">
+      입력 시나리오와 상관없이 변하지 않는 페이지 교체 알고리즘 4가지의 핵심 차이
     </p>
 
-    <!-- 상단 고정 비교표 -->
-    <section class="panel">
-      <h2>알고리즘 한눈에 보기</h2>
-      <p class="sub">
-        입력 시나리오와 상관없이 변하지 않는 페이지 교체 알고리즘 4가지의 핵심 차이
-      </p>
+    <table class="alg-table">
+      <thead>
+      <tr>
+        <th style="width:110px">Algorithm</th>
+        <th style="width:110px">구현 난이도</th>
+        <th>교체 기준</th>
+        <th>요구 정보 / 하드웨어</th>
+        <th>장점</th>
+        <th>단점 / 특징</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="alg-col-name">FIFO</td>
+        <td>
+          <span class="tag">매우 쉬움</span>
+        </td>
+        <td>
+          먼저 메모리에 들어온 페이지를 먼저 교체
+        </td>
+        <td>
+          <span class="tag">Queue 자료구조만 필요</span>
+        </td>
+        <td>
+          구현이 단순하고 오버헤드가 적어, 다른 정책과 성능을 비교할 때
+          <span class="tag-good">기본 기준</span>으로 사용하기 좋음
+        </td>
+        <td>
+          초기에 자주 쓰이는 페이지가 먼저 쫓겨날 수 있고,
+          프레임 수를 늘려도 페이지 폴트가 증가하는
+          <span class="tag-bad">Belady의 모순</span>이 발생할 수 있음
+        </td>
+      </tr>
 
-      <table class="alg-table">
-        <thead>
-          <tr>
-            <th style="width:110px">Algorithm</th>
-            <th style="width:110px">구현 난이도</th>
-            <th>교체 기준</th>
-            <th>요구 정보 / 하드웨어</th>
-            <th>장점</th>
-            <th>단점 / 특징</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="alg-col-name">FIFO</td>
-            <td>
-              <span class="tag">매우 쉬움</span>
-            </td>
-            <td>
-              먼저 메모리에 들어온 페이지를 먼저 교체
-            </td>
-            <td>
-              <span class="tag">Queue 자료구조만 필요</span>
-            </td>
-            <td>
-              구현이 단순하고 오버헤드가 적어, 다른 정책과 성능을 비교할 때
-              <span class="tag-good">기본 기준</span>으로 사용하기 좋음
-            </td>
-            <td>
-              초기에 자주 쓰이는 페이지가 먼저 쫓겨날 수 있고,
-              프레임 수를 늘려도 페이지 폴트가 증가하는
-              <span class="tag-bad">Belady의 모순</span>이 발생할 수 있음
-            </td>
-          </tr>
+      <tr>
+        <td class="alg-col-name">OPT</td>
+        <td>
+          <span class="tag tag-warn">이론적</span>
+        </td>
+        <td>
+          앞으로 <b>가장 오랫동안 사용되지 않을</b> 페이지를 교체
+        </td>
+        <td>
+          <span class="tag tag-bad">미래 참조 시퀀스 전체</span>
+        </td>
+        <td>
+          주어진 참조 문자열에서 <b>페이지 폴트 수가 최소</b>가 되어,
+          다른 알고리즘의 <span class="tag-good">이론적 상한선</span>이 됨
+        </td>
+        <td>
+          실제 시스템에서는 미래를 알 수 없기 때문에 <b>실시간 구현 불가</b>,<br/>
+          시뮬레이션·이론 비교용으로만 사용
+        </td>
+      </tr>
 
-          <tr>
-            <td class="alg-col-name">OPT</td>
-            <td>
-              <span class="tag tag-warn">이론적</span>
-            </td>
-            <td>
-              앞으로 <b>가장 오랫동안 사용되지 않을</b> 페이지를 교체
-            </td>
-            <td>
-              <span class="tag tag-bad">미래 참조 시퀀스 전체</span>
-            </td>
-            <td>
-              주어진 참조 문자열에서 <b>페이지 폴트 수가 최소</b>가 되어,
-              다른 알고리즘의 <span class="tag-good">이론적 상한선</span>이 됨
-            </td>
-            <td>
-              실제 시스템에서는 미래를 알 수 없기 때문에 <b>실시간 구현 불가</b>,<br/>
-              시뮬레이션·이론 비교용으로만 사용
-            </td>
-          </tr>
+      <tr>
+        <td class="alg-col-name">LRU</td>
+        <td>
+          <span class="tag">중간</span>
+        </td>
+        <td>
+          <b>가장 오래 참조되지 않은</b> 페이지를 교체 (시간적 지역성 가정)
+        </td>
+        <td>
+          <span class="tag">최근 참조 시각 / 순서</span>
+        </td>
+        <td>
+          실제 프로그램의 <b>지역성(Locality)</b>에 잘 맞고,
+          많은 경우 OPT에 비교적 <span class="tag-good">근접한 성능</span>을 보임
+        </td>
+        <td>
+          정확한 LRU 구현은 리스트/카운터 갱신 비용이 커서,
+          보통 <b>참조 비트·스택 구조</b> 등으로 근사 구현함
+        </td>
+      </tr>
 
-          <tr>
-            <td class="alg-col-name">LRU</td>
-            <td>
-              <span class="tag">중간</span>
-            </td>
-            <td>
-              <b>가장 오래 참조되지 않은</b> 페이지를 교체 (시간적 지역성 가정)
-            </td>
-            <td>
-              <span class="tag">최근 참조 시각 / 순서</span>
-            </td>
-            <td>
-              실제 프로그램의 <b>지역성(Locality)</b>에 잘 맞고,
-              많은 경우 OPT에 비교적 <span class="tag-good">근접한 성능</span>을 보임
-            </td>
-            <td>
-              정확한 LRU 구현은 리스트/카운터 갱신 비용이 커서,
-              보통 <b>참조 비트·스택 구조</b> 등으로 근사 구현함
-            </td>
-          </tr>
+      <tr>
+        <td class="alg-col-name">Clock (NUR)</td>
+        <td>
+          <span class="tag">쉬움 ~ 중간</span>
+        </td>
+        <td>
+          시계 바늘이 가면서 <b>참조 비트가 0인 페이지</b>부터 교체 (필요 시 Dirty 비트 고려)
+        </td>
+        <td>
+          <span class="tag">참조 비트(R)</span>
+          <span class="tag">변형 비트(D, 선택)</span>
+        </td>
+        <td>
+          간단한 비트 정보만으로 LRU를 <span class="tag-good">저렴하게 근사</span>할 수 있어
+          실제 OS에서 널리 사용되는 계열
+        </td>
+        <td>
+          스캔 주기·리스트 크기에 따라 성능이 달라지며,
+          정확 LRU만큼 정밀하지는 않음. 구현에 따라 다양한 변종이 존재
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
 
-          <tr>
-            <td class="alg-col-name">Clock (NUR)</td>
-            <td>
-              <span class="tag">쉬움 ~ 중간</span>
-            </td>
-            <td>
-              시계 바늘이 가면서 <b>참조 비트가 0인 페이지</b>부터 교체 (필요 시 Dirty 비트 고려)
-            </td>
-            <td>
-              <span class="tag">참조 비트(R)</span>
-              <span class="tag">변형 비트(D, 선택)</span>
-            </td>
-            <td>
-              간단한 비트 정보만으로 LRU를 <span class="tag-good">저렴하게 근사</span>할 수 있어
-              실제 OS에서 널리 사용되는 계열
-            </td>
-            <td>
-              스캔 주기·리스트 크기에 따라 성능이 달라지며,
-              정확 LRU만큼 정밀하지는 않음. 구현에 따라 다양한 변종이 존재
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+  <!-- 하단: 직접 비교 -->
+  <h2 class="section-title">직접 비교하기</h2>
+  <p class="section-desc">
+    참조 문자열(Reference String)과 프레임 수를 선택하고,
+    비교하고 싶은 알고리즘을 선택해 <b>페이지 폴트 수·Hit Rate</b>를 직관적으로 비교할 수 있습니다.
+  </p>
 
-    <!-- 하단: 직접 비교 -->
-    <h2 class="section-title">직접 비교하기</h2>
-    <p class="section-desc">
-      참조 문자열(Reference String)과 프레임 수를 선택하고,
-      비교하고 싶은 알고리즘을 선택해 <b>페이지 폴트 수·Hit Rate</b>를 직관적으로 비교할 수 있습니다.
-    </p>
-
-    <div class="panel" style="margin-bottom:0">
-      <div class="scenario-row">
-        <div class="scenario-row-left">
-          <strong> 예시 시나리오 선택 - - - - - </strong>
-        </div>
-        <div>
-          <select name="scenario" id="scenario-select">
-            <option value="A">Preset A – 좋은 지역성(순차적인 배열 접근)</option>
-            <option value="B">Preset B – 랜덤 접근이 섞인 패턴</option>
-            <option value="C">Preset C – Working Set &gt; 프레임 수</option>
-          </select>
-        </div>
+  <div class="panel" style="margin-bottom:0">
+    <div class="scenario-row">
+      <div class="scenario-row-left">
+        <strong> 예시 시나리오 선택 - - - - - </strong>
       </div>
-
-      <div class="scenario-row">
-        <div class="scenario-row-left">
-          <span>프레임 수 선택</span>
-        </div>
-        <div>
-          <select name="frames" id="frame-select">
-            <option value="3">3 Frames</option>
-            <option value="4">4 Frames</option>
-            <option value="5">5 Frames</option>
-            <option value="8">8 Frames</option>
-          </select>
-        </div>
+      <div>
+        <select name="scenario" id="scenario-select">
+          <option value="A">Preset A – 좋은 지역성(순차적인 배열 접근)</option>
+          <option value="B">Preset B – 랜덤 접근이 섞인 패턴</option>
+          <option value="C">Preset C – Working Set &gt; 프레임 수</option>
+        </select>
       </div>
-
-      <div class="compare-grid">
-        <!-- 왼쪽 알고리즘 -->
-        <div class="compare-card">
-          <div class="compare-header">
-            <div>
-              <div class="compare-title">선택 알고리즘 - 1</div>
-            </div>
-            <div>
-              <div class="mini-label">알고리즘 선택</div>
-              <select name="alg1" id="alg1-select">
-                <option value="FIFO">FIFO</option>
-                <option value="OPT">OPT</option>
-                <option value="LRU">LRU</option>
-                <option value="CLOCK">Clock (NUR)</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <div class="mini-label">핵심 지표 (선택된 시나리오 기준)</div>
-            <table class="metric-table">
-              <tr>
-                <th>총 Page Fault 수</th>
-                <td class="placeholder">어쩌구저쩌구1</td>
-              </tr>
-              <tr>
-                <th>Page Fault Rate</th>
-                <td class="placeholder">어쩌구저쩌구2</td>
-              </tr>
-              <tr>
-                <th>Hit Rate</th>
-                <td class="placeholder">오쩌구저쩌구4</td>
-              </tr>
-              <tr>
-                <th>Average Memory Access Time</th>
-                <td class="placeholder">오저쭈거저쩌구5</td>
-              </tr>
-              <tr>
-                <th>Dirty Page Write 횟수</th>
-                <td class="placeholder">라라라라라리리랄</td>
-              </tr>
-            </table>
-          </div>
-
-          <div>
-            <div class="mini-label">Frame Timeline</div>
-            <div class="gantt-box">
-              저쩌구저쩌구 타임라인
-            </div>
-          </div>
-        </div>
-
-        <!-- 오른쪽 알고리즘 -->
-        <div class="compare-card">
-          <div class="compare-header">
-            <div>
-              <div class="compare-title">선택 알고리즘 - 2</div>
-              <div class="compare-meta">오른쪽에 선택된 알고리즘의 결과</div>
-            </div>
-            <div>
-              <div class="mini-label">알고리즘 선택</div>
-              <select name="alg2" id="alg2-select">
-                <option value="FIFO">FIFO</option>
-                <option value="OPT">OPT</option>
-                <option value="LRU">LRU</option>
-                <option value="CLOCK">Clock (NUR)</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <div class="mini-label">핵심 지표 (선택된 시나리오 기준)</div>
-            <table class="metric-table">
-              <tr>
-                <th>총 Page Fault 수</th>
-                <td class="placeholder">오쭈거저ㅓ쭈거주1</td>
-              </tr>
-              <tr>
-                <th>Page Fault Rate</th>
-                <td class="placeholder">아쩌구저쩌구자저2</td>
-              </tr>
-              <tr>
-                <th>Hit Rate</th>
-                <td class="placeholder">저쩌구어저쩌구3</td>
-              </tr>
-              <tr>
-                <th>Average Memory Access Time</th>
-                <td class="placeholder">우짜구저쩌가주4</td>
-              </tr>
-              <tr>
-                <th>Dirty Page Write 횟수</th>
-                <td class="placeholder">자짜구저자짜구5</td>
-              </tr>
-            </table>
-          </div>
-
-          <div>
-            <div class="mini-label">Frame Timeline</div>
-            <div class="gantt-box">
-              타임라인넣기
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="comment-panel">
-        <strong>코멘트 영역</strong><br/>
-          두알고리즘비교설명 어저쭈구저쩌구
-      </div>
-
-      <div class="btn-row">
-        <button type="button" class="btn" id="save-compare-paging-btn">
-          비교 결과 저장하기
-        </button>
-      </div>
-
     </div>
-  </main>
-  <script>
-    // --- 로그인 / 프로필 버튼 설정 ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('authArea');
-      if (container) {
-        const user = sessionStorage.getItem('user');
-        container.innerHTML = (user && user.trim() !== '')
-          ? `
-          <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
-            <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="8" r="4"></circle>
-              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-            </svg>
-          </button>`
-          : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
-      }
 
-      // 비교 결과 저장 버튼 이벤트 연결
-      const saveBtn = document.getElementById('save-compare-paging-btn');
-      if (saveBtn) {
-        saveBtn.addEventListener('click', saveComparePagingRecord);
-      }
+    <div class="scenario-row">
+      <div class="scenario-row-left">
+        <span>프레임 수 선택</span>
+      </div>
+      <div>
+        <select name="frames" id="frame-select">
+          <option value="3">3 Frames</option>
+          <option value="4">4 Frames</option>
+          <option value="5">5 Frames</option>
+          <option value="8">8 Frames</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="compare-grid">
+      <!-- 왼쪽 알고리즘 -->
+      <div class="compare-card">
+        <div class="compare-header">
+          <div>
+            <div class="compare-title">선택 알고리즘 - 1</div>
+          </div>
+          <div>
+            <div class="mini-label">알고리즘 선택</div>
+            <select name="alg1" id="alg1-select">
+              <option value="FIFO">FIFO</option>
+              <option value="OPT">OPT</option>
+              <option value="LRU">LRU</option>
+              <option value="CLOCK">Clock (NUR)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="mini-label">핵심 지표 (선택된 시나리오 기준)</div>
+          <table class="metric-table">
+            <tr>
+              <th>총 Page Fault 수</th>
+              <td id="alg1-faults" class="placeholder">실행 후 표시됩니다</td>
+            </tr>
+            <tr>
+              <th>Page Fault Rate</th>
+              <td id="alg1-faultRate" class="placeholder">-</td>
+            </tr>
+            <tr>
+              <th>Hit Rate</th>
+              <td id="alg1-hitRate" class="placeholder">-</td>
+            </tr>
+            <tr>
+              <th>Average Memory Access Time</th>
+              <td id="alg1-amat" class="placeholder">-</td>
+            </tr>
+            <tr>
+              <th>Dirty Page Write 횟수</th>
+              <td id="alg1-dirty" class="placeholder">-</td>
+            </tr>
+          </table>
+        </div>
+
+        <div>
+          <div class="mini-label">Frame Timeline</div>
+          <div class="gantt-box" id="alg1-timeline">
+            비교 실행 후 참조/폴트 타임라인이 표시됩니다.
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽 알고리즘 -->
+      <div class="compare-card">
+        <div class="compare-header">
+          <div>
+            <div class="compare-title">선택 알고리즘 - 2</div>
+            <div class="compare-meta">오른쪽에 선택된 알고리즘의 결과</div>
+          </div>
+          <div>
+            <div class="mini-label">알고리즘 선택</div>
+            <select name="alg2" id="alg2-select">
+              <option value="FIFO">FIFO</option>
+              <option value="OPT">OPT</option>
+              <option value="LRU">LRU</option>
+              <option value="CLOCK">Clock (NUR)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="mini-label">핵심 지표 (선택된 시나리오 기준)</div>
+          <table class="metric-table">
+            <tr>
+              <th>총 Page Fault 수</th>
+              <td id="alg2-faults" class="placeholder">실행 후 표시됩니다</td>
+            </tr>
+            <tr>
+              <th>Page Fault Rate</th>
+              <td id="alg2-faultRate" class="placeholder">-</td>
+            </tr>
+            <tr>
+              <th>Hit Rate</th>
+              <td id="alg2-hitRate" class="placeholder">-</td>
+            </tr>
+            <tr>
+              <th>Average Memory Access Time</th>
+              <td id="alg2-amat" class="placeholder">-</td>
+            </tr>
+            <tr>
+              <th>Dirty Page Write 횟수</th>
+              <td id="alg2-dirty" class="placeholder">-</td>
+            </tr>
+          </table>
+        </div>
+
+        <div>
+          <div class="mini-label">Frame Timeline</div>
+          <div class="gantt-box" id="alg2-timeline">
+            비교 실행 후 참조/폴트 타임라인이 표시됩니다.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comment-panel" id="insight-panel">
+      <strong>Comparison Insight</strong><br/><br>
+      <span id="insight-text">
+        알고리즘 비교 후 동일한 조건에서 왜 서로 다른 실행 흐름과 성능을 보이는지 설명합니다.
+      </span>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="btn" id="run-compare-paging-btn">
+        비교 실행
+      </button>
+      <button type="button" class="btn" id="save-compare-paging-btn">
+        비교 결과 저장하기
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // --- 로그인 / 프로필 버튼 설정 + 버튼 이벤트 등록 ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('authArea');
+    if (container) {
+      const user = sessionStorage.getItem('user');
+      container.innerHTML = (user && user.trim() !== '')
+        ? `
+        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </button>`
+        : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+    }
+
+    const saveBtn = document.getElementById('save-compare-paging-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveComparePagingRecord);
+    }
+
+    const runBtn = document.getElementById('run-compare-paging-btn');
+    if (runBtn) {
+      runBtn.addEventListener('click', runComparePaging);
+    }
+  });
+
+  // --- Preset 참조열 정의 ---
+  function getPresetRefs(scenarioId) {
+    switch (scenarioId) {
+      case 'A':
+        // 좋은 지역성: 거의 순차 접근
+        return [0,1,2,3,4,5,4,3,2,1,0,1,2,3,4,5];
+      case 'B':
+        // 랜덤성이 섞인 패턴
+        return [7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1];
+      case 'C':
+        // Working set > frames 느낌
+        return [1,2,3,4,5,1,2,3,4,5,1,2,3,4,5];
+      default:
+        return [];
+    }
+  }
+
+  // --- /api/sim/paging 호출 ---
+  async function requestPaging(algo, frames, refs) {
+    const body = {
+      algo: algo,
+      frames: frames,
+      refs: refs
+    };
+
+    const res = await fetch('/api/sim/paging', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
 
-    // --- 비교 결과 저장 함수 ---
-    async function saveComparePagingRecord() {
-      // 1) 현재 선택값 읽기
-      const scenarioSelect = document.getElementById('scenario-select');
-      const frameSelect = document.getElementById('frame-select');
-      const alg1Select = document.getElementById('alg1-select');
-      const alg2Select = document.getElementById('alg2-select');
-
-      if (!scenarioSelect || !frameSelect || !alg1Select || !alg2Select) {
-        alert('선택 정보를 읽어올 수 없습니다.');
-        return;
-      }
-
-      const scenario = scenarioSelect.value;
-      const scenarioLabel = scenarioSelect.options[scenarioSelect.selectedIndex].text;
-
-      const frameValue = frameSelect.value;
-      const frameLabel = frameSelect.options[frameSelect.selectedIndex].text;
-
-      const alg1 = alg1Select.value;
-      const alg1Label = alg1Select.options[alg1Select.selectedIndex].text;
-
-      const alg2 = alg2Select.value;
-      const alg2Label = alg2Select.options[alg2Select.selectedIndex].text;
-
-      // 2) 서버에 보낼 payload 구성
-      const payload = {
-        type: 'compare-paging',
-        title: `Page Replacement 비교 (${alg1Label} vs ${alg2Label})`,
-        scenario,
-        scenarioLabel,
-        frames: Number(frameValue),
-        frameLabel,
-        alg1,
-        alg1Label,
-        alg2,
-        alg2Label
-        // 나중에 진짜 폴트 수 / Hit Rate 계산하면 여기 metrics 같은 필드 추가 가능
-      };
-
-      // 3) /api/records 로 전송
-      try {
-        const res = await fetch('/api/records', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          throw new Error('status ' + res.status);
-        }
-
-        alert('저장하였습니다. 마이페이지에서 확인하세요.');
-      } catch (e) {
-        console.error(e);
-        alert('저장 중 오류가 발생했습니다.');
-      }
+    if (!res.ok) {
+      throw new Error('서버 오류: ' + res.status);
     }
-  </script>
+    return await res.json(); // { steps: [...], faults: n }
+  }
+
+  function calcRates(faults, total) {
+    if (!total || total <= 0) {
+      return { faultRate: 0, hitRate: 0 };
+    }
+    const faultRate = faults / total;
+    const hitRate = 1 - faultRate;
+    return { faultRate, hitRate };
+  }
+
+  // Hit=1, Miss=10 가정한 AMAT
+  function calcAMAT(faultRate, hitRate) {
+    const Th = 1;   // hit time
+    const Tm = 10;  // miss penalty
+    const amat = Th * hitRate + Tm * faultRate;
+    return amat;
+  }
+
+  function formatTimeline(steps) {
+    if (!steps || steps.length === 0) {
+      return '시뮬레이션 결과가 없습니다.';
+    }
+    const parts = steps.map(step => {
+      const tag = step.fault ? 'F' : 'H';
+      return `${step.ref}(${tag})`;
+    });
+    const maxLen = 40;
+    if (parts.length > maxLen) {
+      return parts.slice(0, maxLen).join('  ') + '  …';
+    }
+    return parts.join('  ');
+  }
+
+  function renderPagingResult(side, algo, data, refCount) {
+    const faults = data.faults ?? 0;
+    const steps = data.steps || [];
+    const { faultRate, hitRate } = calcRates(faults, refCount);
+    const amat = calcAMAT(faultRate, hitRate);
+
+    const prefix = side === 'left' ? 'alg1' : 'alg2';
+
+    const fEl  = document.getElementById(prefix + '-faults');
+    const frEl = document.getElementById(prefix + '-faultRate');
+    const hrEl = document.getElementById(prefix + '-hitRate');
+    const aEl  = document.getElementById(prefix + '-amat');
+    const dEl  = document.getElementById(prefix + '-dirty');
+    const tEl  = document.getElementById(prefix + '-timeline');
+
+    if (!fEl || !frEl || !hrEl || !aEl || !dEl || !tEl) return;
+
+    fEl.textContent  = faults;
+    frEl.textContent = (faultRate * 100).toFixed(1) + ' %';
+    hrEl.textContent = (hitRate * 100).toFixed(1) + ' %';
+    aEl.textContent  = amat.toFixed(2) + ' (단위 시간 기준)';
+    dEl.textContent  = '-'; // Dirty 페이지는 현재 시뮬에서 미구현
+    tEl.textContent  = formatTimeline(steps);
+
+    fEl.classList.remove('placeholder');
+    frEl.classList.remove('placeholder');
+    hrEl.classList.remove('placeholder');
+    aEl.classList.remove('placeholder');
+    dEl.classList.remove('placeholder');
+  }
+
+  // =========================================
+  //   Comparison Insight · 비교 인사이트 로직
+  // =========================================
+
+  // 알고리즘 쌍 key (순서 상관 X)
+  function makePairKey(a, b) {
+    const arr = [(a || '').toUpperCase(), (b || '').toUpperCase()].sort();
+    return arr.join('-');
+  }
+
+  // 프레임 수 bucket
+  function getFrameBucket(frames) {
+    const f = Number(frames);
+    if (!f || isNaN(f)) return 'mid';
+    if (f <= 3) return 'small';
+    if (f <= 5) return 'mid';
+    return 'large';
+  }
+
+  // 1) 알고리즘 쌍 기본 코멘트
+  const baseCommentMap = {
+    'FIFO-OPT':
+      '같은 참조 문자열과 프레임 수에서 OPT는 “앞으로 가장 오랫동안 쓰이지 않을 페이지”를 교체하기 때문에 이론적으로 가능한 최소 Page Fault 수를 보여 줍니다. 반면 FIFO는 단순히 먼저 들어온 페이지부터 내쫓기 때문에, 자주 쓰이는 페이지가 먼저 나가거나 프레임을 늘렸는데도 Page Fault가 오히려 증가하는 Belady의 모순이 나타날 수 있습니다.',
+    'FIFO-LRU':
+      'FIFO는 들어온 순서만 보고 교체하기 때문에, 최근에 계속 쓰이고 있는 페이지라도 오래 전에 들어왔다는 이유만으로 쫓아냅니다. LRU는 “가장 오래 참조되지 않은 페이지”를 교체해서 실제 프로그램의 시간적 지역성을 반영하므로 일반적으로 FIFO보다 Page Fault 수가 적고 Hit Rate가 더 높은 편입니다.',
+    'FIFO-CLOCK':
+      'Clock은 하드웨어의 참조 비트(R)를 이용해 “최근에 쓰이지 않은 페이지”부터 교체하려는 구조라, 들어온 순서만 보는 FIFO보다 LRU에 더 가까운 행동을 합니다. 따라서 구현 난이도는 FIFO보다 약간 높지만, 대부분의 경우 Page Fault·Hit Rate 면에서 FIFO보다 안정적인 성능을 보여 줍니다.',
+    'OPT-LRU':
+      'OPT는 “미래를 전부 안다”는 비현실적인 가정 덕분에 항상 가장 좋은 답을 내지만, 실제 시스템에선 구현할 수 없습니다. LRU는 과거의 참조 기록을 기반으로 “최근에 많이 썼으면 앞으로도 쓸 것”이라는 지역성 가정을 이용해 OPT에 근접한 결과를 목표로 합니다. 따라서 Page Fault 수는 OPT보다는 많지만, 실전에서 구현 가능한 것 중에서는 성능이 가장 좋은 축에 속합니다.',
+    'OPT-CLOCK':
+      'Clock은 참조 비트만 간단히 확인해서 “최근에 쓰인 적이 없다면 교체 후보”로 보는 방식이라, LRU보다도 더 근사적인 방식입니다. OPT와 비교했을 때 Page Fault 수는 더 많지만, 요구하는 정보가 훨씬 단순하고 “자주 쓰이지 않는 페이지부터 쫓아낸다”는 방향은 OPT와 비슷합니다.',
+    'CLOCK-LRU':
+      'LRU는 “정확한 마지막 참조 시점”이나 스택 구조를 유지해야 해서 구현 비용이 높은 대신, 지역성을 잘 반영해 Page Fault를 많이 줄여 줍니다. Clock은 참조 비트만 이용하는 저렴한 근사 방식이라 구현이 단순하고 오버헤드가 적지만, LRU만큼 정밀하게 “진짜 오래 안 쓰인 페이지”를 골라내지는 못합니다. 그 대신 LRU와 OPT 중간 정도의 성능을 비교적 싼 비용으로 얻을 수 있다는 장점이 있습니다.'
+  };
+
+  // 2) 시나리오별 코멘트
+  const scenarioCommentMap = {
+    'A': { // 좋은 지역성
+      'FIFO-OPT':
+        'Preset A처럼 순차 접근이 강한 경우 OPT는 거의 최적 수준의 Page Fault를 보여 주고, FIFO도 어느 정도는 지역성을 따라가지만 초기 구간에서 자주 쓰일 페이지가 먼저 쫓겨나며 OPT보다 더 많은 Fault가 발생하는 구간이 눈에 띕니다.',
+      'FIFO-LRU':
+        'Preset A에서는 LRU가 최근에 쓰인 페이지를 잘 붙잡아 두기 때문에 FIFO보다 Page Fault가 확실히 줄어드는 모습을 볼 수 있습니다. FIFO는 초기에 들어온 페이지를 끝까지 먼저 내쫓으면서, 실제로 곧 다시 참조될 페이지를 잃어버리는 비효율이 나타납니다.',
+      'FIFO-CLOCK':
+        '순차 접근에서는 Clock도 참조 비트를 이용해 “최근에 쓰인 페이지”를 보호해 주기 때문에, 단순 FIFO보다 Page Fault가 줄어드는 경향이 있습니다. 시계 바늘이 한 바퀴 도는 동안 참조 비트가 1로 유지되는 페이지는 그대로 남고, 진짜로 한동안 쓰이지 않은 페이지가 교체되는 패턴이 잘 드러납니다.',
+      'OPT-LRU':
+        'Preset A에서는 순차 접근이 강해서 LRU의 “최근에 썼으면 앞으로도 쓴다”는 가정이 거의 완벽하게 들어맞습니다. OPT와 비교했을 때 Page Fault 수 차이가 크지 않고, LRU가 OPT에 상당히 근접한 성능을 보여 주는 좋은 예시가 됩니다.',
+      'OPT-CLOCK':
+        'Preset A에서 Clock은 참조 비트를 기반으로 LRU를 싸게 근사하기 때문에, OPT보다는 Page Fault가 많지만 FIFO보다는 확실히 적은 중간 수준의 성능을 보여 줍니다. “참조 비트만 있어도 지역성이 어느 정도 살아난다”는 것을 확인할 수 있는 시나리오입니다.',
+      'CLOCK-LRU':
+        '순차 접근에서는 LRU와 Clock 모두 지역성을 어느 정도 잘 활용하므로 둘의 Page Fault 차이가 크게 벌어지지 않을 수 있습니다. 다만 참조 비트만 보는 Clock 특성상 세밀한 시간 순서 정보가 필요한 상황에서는 LRU가 조금 더 안정적인 Hit Rate를 보여 주는 경향이 있습니다.'
+    },
+    'B': { // 랜덤 섞임
+      'FIFO-OPT':
+        'Preset B처럼 랜덤성이 섞인 경우 FIFO는 “먼저 들어온 순서”만 보고 교체하기 때문에, 실제로는 곧 다시 참조될 페이지를 내쫓는 경우가 잦아집니다. OPT는 미래 정보를 알고 있기 때문에 Page Fault 수 차이가 A보다 더 극적으로 벌어지는 편입니다.',
+      'FIFO-LRU':
+        '랜덤 접근이 많아지면 LRU도 이상적인 선택과는 거리가 생기지만, 그래도 “최근에 한 번도 안 쓰인 페이지”를 교체하는 전략 덕분에 FIFO보다는 Page Fault를 줄이는 데 유리합니다. 특히 FIFO가 반복해서 비슷한 페이지 집합을 떨구고 다시 올리는 비효율이 생길 때, LRU는 상대적으로 안정적인 Hit Rate를 유지합니다.',
+      'FIFO-CLOCK':
+        'Preset B에서는 Clock도 참조 비트를 활용해 한동안 안 쓰인 페이지부터 내보내려 하지만, 랜덤 점프가 많을수록 참조 비트 패턴이 흩어져 이상적인 선택과 멀어질 수 있습니다. 그래도 단순 FIFO보다는 Page Fault 수가 줄어드는 구간이 많고, 최소한 “완전 랜덤 교체”보다는 똑똑하게 움직이는 모습을 볼 수 있습니다.',
+      'OPT-LRU':
+        '랜덤성이 섞인 Preset B에서는 LRU가 때때로 “방금 썼지만 앞으로는 오래 안 쓸 페이지”를 붙잡고, 사실상 다시는 안 쓸 페이지를 내쫓는 실수를 하게 됩니다. 그 결과 OPT와의 Page Fault 차이가 A보다 커지고, LRU가 항상 OPT에 가깝지는 않다는 점을 잘 보여 줍니다.',
+      'OPT-CLOCK':
+        'Preset B에서 Clock은 참조 비트만 보고 대략적인 “최근 사용 여부”만 판단하므로, LRU보다도 더 근사적인 전략이 됩니다. OPT와 비교했을 때 Page Fault 편차가 제법 커질 수 있고, 특정 페이지가 자주 쓰이긴 하지만 참조 간격이 길어지는 경우 Clock이 그 페이지를 일찍 버리는 패턴이 나타납니다.',
+      'CLOCK-LRU':
+        '랜덤 접근이 많을수록 LRU와 Clock 둘 다 최선의 선택과는 멀어지지만, LRU는 여전히 최근 사용 시점을 더 세밀하게 기억하기 때문에 Clock보다 Page Fault가 적게 나오는 경우가 많습니다. 반대로 Clock은 LRU에 비해 성능을 조금 양보하는 대신 구현 비용과 오버헤드를 크게 줄인 타협안에 가깝습니다.'
+    },
+    'C': { // Working set > frames
+      'FIFO-OPT':
+        'Preset C처럼 Working Set이 프레임 수보다 훨씬 큰 상황에서는 OPT조차도 Page Fault를 획기적으로 줄일 수 없고 “최악 중에서 그나마 덜 나쁜” 결과를 보여 줍니다. FIFO는 이런 상황에서 자주 쓰이는 페이지를 계속 내쫓으며, OPT와의 Fault 수 차이가 크게 벌어지는 극단적인 예시를 만들 수 있습니다.',
+      'FIFO-LRU':
+        '트래싱에 가까운 Preset C에서는 어떤 알고리즘을 쓰더라도 Fault가 많지만, LRU는 그나마 “최근에 자주 쓰인 페이지”라도 보호하려고 해서 FIFO보다 약간 더 나은 Hit Rate를 보이는 정도의 차이가 납니다. 전체적으로는 메모리 자체가 부족하기 때문에 알고리즘 차이보다 프레임 수 부족의 영향이 더 크다는 점도 드러납니다.',
+      'FIFO-CLOCK':
+        'Preset C에서는 Clock도 참조 비트 패턴이 항상 1로 가득 차 있는 것처럼 보이면서, 사실상 “모두 자주 쓰인다”라는 신호만 받게 됩니다. 이 경우 Clock과 FIFO의 Page Fault 차이가 줄어들 수 있고, 둘 다 트래싱에 가깝게 자주 Fault를 발생시키는 모습을 확인할 수 있습니다.',
+      'OPT-LRU':
+        'Working Set이 프레임 수를 심하게 초과하는 C 시나리오에서는 OPT와 LRU의 차이도 의미가 줄어듭니다. LRU가 최대한 최근 페이지를 지키려 하지만, 애초에 메모리가 부족해 둘 다 자주 교체할 수밖에 없어서 Page Fault 수가 전반적으로 높습니다. 이 시나리오는 “알고리즘보다 프레임 수가 먼저 문제인 상태”를 잘 보여 줍니다.',
+      'OPT-CLOCK':
+        'Preset C에서 Clock은 참조 비트만 보면 모든 페이지가 자주 쓰이는 것처럼 보이기 때문에, 진짜로 한동안 안 쓸 페이지를 가려내기 어렵습니다. OPT와 비교하면 Fault 수 차이가 상당히 벌어지며, “참조 비트 하나만으로는 트래싱 상황을 제대로 구분하기 힘들다”는 한계를 보여 줍니다.',
+      'CLOCK-LRU':
+        'C 시나리오에서는 LRU와 Clock 모두 충분한 프레임이 없어서 자주 Fault를 내지만, LRU는 조금이라도 최근에 쓰인 페이지를 우선적으로 유지하려 합니다. Clock은 참조 비트가 전체적으로 자주 1로 세트되면서 “누가 진짜 오래 안 쓰였는지” 구분이 많이 흐려져, LRU와의 Page Fault 차이가 조금 더 벌어질 수 있습니다.'
+    }
+  };
+
+  // 3) 프레임 수 bucket 코멘트
+  const frameCommentMap = {
+    'small':
+      '프레임 수가 매우 적게 주어진 상태에서는 어떤 알고리즘을 쓰더라도 Page Fault가 전반적으로 많아집니다. 이 구간에서는 알고리즘 성능 차이보다 “Working Set 자체가 메모리에 못 들어오는 구조적 한계”가 먼저 드러나는 편입니다.',
+    'mid':
+      '프레임이 조금 더 여유 있게 주어지면 OPT·LRU·Clock처럼 지역성을 이용하는 알고리즘들이 FIFO보다 눈에 띄게 좋은 Hit Rate를 보여 주기 시작합니다. 특히 LRU/Clock은 자주 쓰이는 페이지를 메모리 안에 그나마 유지하면서, FIFO와의 Page Fault 격차가 가장 잘 드러나는 구간이 됩니다.',
+    'large':
+      '프레임 수가 충분히 커져서 Working Set과 비슷하거나 더 큰 수준이 되면, 모든 알고리즘의 Page Fault 수가 전반적으로 내려가면서 알고리즘 간 차이가 줄어듭니다. 이 구간에서는 “어떤 알고리즘인가”보다 “메모리가 충분히 크다”는 사실이 더 중요한 요소가 됩니다.'
+  };
+
+  function getPagingComment(alg1, alg2, scenarioId, frames) {
+    const upperA = (alg1 || '').toUpperCase();
+    const upperB = (alg2 || '').toUpperCase();
+
+    // 같은 알고리즘 선택 시
+    if (upperA === upperB && upperA) {
+      return `두 카드 모두 <b>${upperA}</b> 알고리즘을 선택해서<br/>
+같은 참조 문자열·프레임 수 기준으로 완전히 같은 패턴이 나오는 것이 정상입니다.<br/>
+이 경우에는 절대적인 성능을 보는 용도로 쓸 수 있습니다.`;
+    }
+
+    const pairKey = makePairKey(alg1, alg2);
+    const base = baseCommentMap[pairKey] || '';
+
+    const scenMap = scenarioCommentMap[scenarioId] || {};
+    const scen = scenMap[pairKey] || '';
+
+    const bucket = getFrameBucket(frames);
+    let frame = frameCommentMap[bucket] || '';
+
+    if (bucket === 'mid' && pairKey.includes('FIFO')) {
+      frame += (frame ? ' ' : '') +
+        '또한 이 정도 프레임 크기는 FIFO에서 프레임 수 변화에 따른 Belady의 모순 개념을 설명하기 좋은 조건이 되기도 합니다(실제 발생 여부와 무관하게 교육용 예제로 사용하기 좋습니다).';
+    }
+
+    const parts = [base, scen, frame].filter(Boolean);
+    if (!parts.length) return null;
+    return parts.join('<br/><br/>');
+  }
+
+  function updatePagingComment(alg1, alg2, scenarioId, frames) {
+    const insightSpan = document.getElementById('insight-text');
+    if (!insightSpan) return;
+
+    const comment = getPagingComment(alg1, alg2, scenarioId, frames);
+    if (!comment) {
+      insightSpan.innerHTML =
+        '알고리즘 비교 후 동일한 조건에서 왜 서로 다른 실행 흐름과 성능을 보이는지 설명합니다.';
+      return;
+    }
+    insightSpan.innerHTML = comment;
+  }
+
+  // --- “비교 실행” 버튼 로직 ---
+  async function runComparePaging() {
+    const scenarioSelect = document.getElementById('scenario-select');
+    const frameSelect = document.getElementById('frame-select');
+    const alg1Select = document.getElementById('alg1-select');
+    const alg2Select = document.getElementById('alg2-select');
+
+    if (!scenarioSelect || !frameSelect || !alg1Select || !alg2Select) {
+      alert('선택 정보를 읽어올 수 없습니다.');
+      return;
+    }
+
+    const scenarioId = scenarioSelect.value;
+    const refs = getPresetRefs(scenarioId);
+    if (!refs || refs.length === 0) {
+      alert('선택된 시나리오에 참조 문자열이 없습니다.');
+      return;
+    }
+
+    const frames = parseInt(frameSelect.value || '3', 10);
+    const alg1 = alg1Select.value;
+    const alg2 = alg2Select.value;
+
+    try {
+      const [res1, res2] = await Promise.all([
+        requestPaging(alg1, frames, refs),
+        requestPaging(alg2, frames, refs)
+      ]);
+
+      renderPagingResult('left', alg1, res1, refs.length);
+      renderPagingResult('right', alg2, res2, refs.length);
+
+      // Comparison Insight 업데이트
+      updatePagingComment(alg1, alg2, scenarioId, frames);
+    } catch (e) {
+      console.error(e);
+      alert('비교 실행 중 오류가 발생했습니다.');
+    }
+  }
+
+  // --- 비교 결과 저장 함수 ---
+  async function saveComparePagingRecord() {
+    const scenarioSelect = document.getElementById('scenario-select');
+    const frameSelect = document.getElementById('frame-select');
+    const alg1Select = document.getElementById('alg1-select');
+    const alg2Select = document.getElementById('alg2-select');
+
+    if (!scenarioSelect || !frameSelect || !alg1Select || !alg2Select) {
+      alert('선택 정보를 읽어올 수 없습니다.');
+      return;
+    }
+
+    const scenario = scenarioSelect.value;
+    const scenarioLabel = scenarioSelect.options[scenarioSelect.selectedIndex].text;
+
+    const frameValue = frameSelect.value;
+    const frameLabel = frameSelect.options[frameSelect.selectedIndex].text;
+
+    const alg1 = alg1Select.value;
+    const alg1Label = alg1Select.options[alg1Select.selectedIndex].text;
+
+    const alg2 = alg2Select.value;
+    const alg2Label = alg2Select.options[alg2Select.selectedIndex].text;
+
+    const insightSpan = document.getElementById('insight-text');
+    const insightText = insightSpan ? insightSpan.innerText : '';
+
+    const payload = {
+      type: 'compare-paging',
+      title: `Page Replacement 비교 (${alg1Label} vs ${alg2Label})`,
+      scenario,
+      scenarioLabel,
+      frames: Number(frameValue),
+      frameLabel,
+      alg1,
+      alg1Label,
+      alg2,
+      alg2Label,
+      insight: insightText
+    };
+
+    try {
+      const res = await fetch('/api/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        throw new Error('status ' + res.status);
+      }
+
+      alert('저장하였습니다. 마이페이지에서 확인하세요.');
+    } catch (e) {
+      console.error(e);
+      alert('저장 중 오류가 발생했습니다.');
+    }
+  }
+</script>
+
 </body>
 </html>

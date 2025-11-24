@@ -37,4 +37,6 @@ public class SimController {
     public Map<String,Object> deadlock(@RequestBody BankerReq req){
         return bankersService.run(req);
     }
-}
+
+    }
+
