@@ -44,6 +44,27 @@
     .dropdown > span > a{color:#fff;text-decoration:none}
     .actions{display:flex;align-items:center;gap:20px}
     #authArea{}
+
+        .btn-row{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+      justify-content:flex-end;
+    }
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:8px 16px;
+      font-size:.9rem;
+      cursor:pointer;
+      background:var(--btn);
+      color:#fff;
+    }
+    .btn:hover{
+      background:var(--btn-hover);
+    }
+
+
     @media (max-width:880px){
       header{padding:16px 20px;flex-wrap:wrap;gap:12px}
       nav{gap:40px}
@@ -240,15 +261,16 @@
 </head>
 <body>
   <header>
-    <div class="logo">OS Platform</div>
+    <a href="/index.html" class="logo">OS Platform</a>
+
     <nav>
       <!-- Learn -->
       <div class="dropdown">
         <span>Learn</span>
         <div class="dropdown-content">
-          <a href="/learn-scheduling.html">스케줄링</a>
-          <a href="/learn-paging.html">페이지교체</a>
-          <a href="/learn-deadlock.html">데드록</a>
+          <a href="/learn-scheduling.html">CPU Scheduling</a>
+          <a href="/learn-paging.html">Page Replacement</a>
+          <a href="/learn-deadlock.html">Deadlock</a>
         </div>
       </div>
 
@@ -256,29 +278,21 @@
       <div class="dropdown">
         <span>Simulator</span>
         <div class="dropdown-content">
-          <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
-          <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
-          <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
+          <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
+          <a href="/sim-paging.html">Page Replacement Simulator</a>
+          <a href="/sim-deadlock.html">Deadlock Simulator</a>
         </div>
       </div>
 
       <!-- Compare -->
       <div class="dropdown">
-        <span>
-          <a href="/compare-scheduling.html" style="color:#fff;text-decoration:none">
-            Compare
-          </a>
-        </span>
+        <span>Compare</span>
+        <div class="dropdown-content">
+          <a href="/compare-scheduling.html">Scheduling Algorithms Compare</a>
+          <a href="/compare-paging.html">Paging Algorithms Compare</a>
+        </div>
       </div>
 
-      <!-- Graph -->
-      <div class="dropdown">
-        <span>
-          <a href="/graph-deadlock.html" style="color:#fff;text-decoration:none">
-            Graph
-          </a>
-        </span>
-      </div>
     </nav>
 
     <div class="actions">
@@ -545,7 +559,97 @@
         <strong>코멘트 영역</strong><br/>
           두알고리즘비교설명 어저쭈구저쩌구
       </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn" id="save-compare-paging-btn">
+          비교 결과 저장하기
+        </button>
+      </div>
+
     </div>
   </main>
+  <script>
+    // --- 로그인 / 프로필 버튼 설정 ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('authArea');
+      if (container) {
+        const user = sessionStorage.getItem('user');
+        container.innerHTML = (user && user.trim() !== '')
+          ? `
+          <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+            <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+            </svg>
+          </button>`
+          : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+      }
+
+      // 비교 결과 저장 버튼 이벤트 연결
+      const saveBtn = document.getElementById('save-compare-paging-btn');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', saveComparePagingRecord);
+      }
+    });
+
+    // --- 비교 결과 저장 함수 ---
+    async function saveComparePagingRecord() {
+      // 1) 현재 선택값 읽기
+      const scenarioSelect = document.getElementById('scenario-select');
+      const frameSelect = document.getElementById('frame-select');
+      const alg1Select = document.getElementById('alg1-select');
+      const alg2Select = document.getElementById('alg2-select');
+
+      if (!scenarioSelect || !frameSelect || !alg1Select || !alg2Select) {
+        alert('선택 정보를 읽어올 수 없습니다.');
+        return;
+      }
+
+      const scenario = scenarioSelect.value;
+      const scenarioLabel = scenarioSelect.options[scenarioSelect.selectedIndex].text;
+
+      const frameValue = frameSelect.value;
+      const frameLabel = frameSelect.options[frameSelect.selectedIndex].text;
+
+      const alg1 = alg1Select.value;
+      const alg1Label = alg1Select.options[alg1Select.selectedIndex].text;
+
+      const alg2 = alg2Select.value;
+      const alg2Label = alg2Select.options[alg2Select.selectedIndex].text;
+
+      // 2) 서버에 보낼 payload 구성
+      const payload = {
+        type: 'compare-paging',
+        title: `Page Replacement 비교 (${alg1Label} vs ${alg2Label})`,
+        scenario,
+        scenarioLabel,
+        frames: Number(frameValue),
+        frameLabel,
+        alg1,
+        alg1Label,
+        alg2,
+        alg2Label
+        // 나중에 진짜 폴트 수 / Hit Rate 계산하면 여기 metrics 같은 필드 추가 가능
+      };
+
+      // 3) /api/records 로 전송
+      try {
+        const res = await fetch('/api/records', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error('status ' + res.status);
+        }
+
+        alert('저장하였습니다. 마이페이지에서 확인하세요.');
+      } catch (e) {
+        console.error(e);
+        alert('저장 중 오류가 발생했습니다.');
+      }
+    }
+  </script>
 </body>
 </html>

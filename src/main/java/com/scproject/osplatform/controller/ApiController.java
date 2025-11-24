@@ -1,6 +1,7 @@
 package com.scproject.osplatform.controller;
 
 import org.springframework.http.ResponseEntity;
+import java.util.Objects;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -37,18 +38,28 @@ public class ApiController {
 
     // 기록 생성 후 리스트 저장
     @PostMapping("/records")
-    public Map<String, Object> createRecord(@RequestBody Map<String, String> body) {
-        String title = body.getOrDefault("title", "내 기록");
+    public Map<String, Object> createRecord(@RequestBody Map<String, Object> body) {
+
         int id = seq.getAndIncrement();
 
         Map<String, Object> rec = new HashMap<>();
+
         rec.put("id", id);
-        rec.put("title", title);
         rec.put("created", System.currentTimeMillis());
+
+        // 제목 기본값
+        rec.put("title", body.getOrDefault("title", "내 기록"));
+
+        // 어떤 시뮬인지 (scheduling or paging)
+        rec.put("type", body.getOrDefault("type", "unknown"));
+
+        // 실제 시뮬레이션 결과 payload 전체 저장 가능
+        rec.put("data", body);
 
         records.add(rec);
         return rec;
     }
+
 
     //기록목록 조회
     @GetMapping("/records")

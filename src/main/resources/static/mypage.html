@@ -5,116 +5,621 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Page - OS Platform</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f5f6f8;
-      color: #222;
-      display: flex;
-      height: 100vh;
+    :root{
+      --bg:#f3f4f6;
+      --sidebar-bg:#ffffff;
+      --accent:#2563eb;
+      --accent-dark:#1d4ed8;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --card-bg:#ffffff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    /* 전체 레이아웃 */
+    .page{
+      display:flex;
+      min-height:100vh;
     }
 
     /* 왼쪽 사이드바 */
-    .sidebar {
-      width: 260px;
-      background-color: #ffffff;
-      border-right: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-      padding: 24px 16px;
-      box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+    .sidebar{
+      width:260px;
+      background:var(--sidebar-bg);
+      border-right:1px solid var(--border);
+      padding:24px 20px;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+    .sidebar-title{
+      font-size:1.1rem;
+      font-weight:700;
+      margin-bottom:4px;
+    }
+    .sidebar-menu-title{
+      font-size:.9rem;
+      font-weight:600;
+      margin-bottom:6px;
+    }
+    .sidebar-menu-label{
+      font-size:.86rem;
+      color:var(--muted);
+      margin-bottom:10px;
     }
 
-    .sidebar h2 {
-      font-size: 1.1em;
-      color: #111;
-      font-weight: 700;
-      margin-bottom: 30px;
+    .record-list{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      overflow-y:auto;
+      max-height:calc(100vh - 140px);
+      padding-right:4px;
+    }
+    .record-item{
+      border-radius:10px;
+      padding:7px 9px;
+      cursor:pointer;
+      background:transparent;
+      border:1px solid transparent;
+      transition:background .15s ease,border-color .15s ease,transform .1s ease;
+    }
+    .record-item:hover{
+      background:#eff6ff;
+    }
+    .record-item.active{
+      background:#dbeafe;
+      border-color:#bfdbfe;
+    }
+    .record-item-title{
+      font-size:.9rem;
+      font-weight:600;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .record-item-meta{
+      font-size:.78rem;
+      color:var(--muted);
+      margin-top:2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .records-empty{
+      font-size:.85rem;
+      color:var(--muted);
+      margin:0;
     }
 
-    .menu-item {
-      font-size: 0.95em;
-      color: #333;
-      padding: 10px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 4px;
-      transition: background 0.2s ease;
+    /* 오른쪽 메인 영역 */
+    .main{
+      flex:1;
+      padding:32px 36px;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+    .main-header-title{
+      font-size:1.6rem;
+      font-weight:800;
+      margin:0 0 6px;
+      text-align:left;
+    }
+    .main-header-desc{
+      margin:0 0 16px;
+      font-size:.92rem;
+      color:var(--muted);
+    }
+    .btn-row{
+      display:flex;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:9px 18px;
+      font-size:.9rem;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn-primary{
+      background:var(--accent);
+      color:#fff;
+    }
+    .btn-primary:hover{background:var(--accent-dark)}
+    .btn-secondary{
+      background:#374151;
+      color:#fff;
     }
 
-    .menu-item:hover {
-      background-color: #e8f5ff;
-      color: #0078ff;
+    /* 상세 패널 */
+    .detail-panel{
+      background:var(--card-bg);
+      border-radius:18px;
+      border:1px solid var(--border);
+      padding:18px 20px 22px;
+      box-shadow:0 8px 24px rgba(15,23,42,0.06);
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .detail-empty{
+      font-size:.95rem;
+      color:var(--muted);
+      margin-top:4px;
+    }
+    .detail-title{
+      font-size:1.1rem;
+      font-weight:700;
+      margin-bottom:4px;
+    }
+    .detail-meta{
+      font-size:.85rem;
+      color:var(--muted);
+      margin-bottom:10px;
     }
 
-    /* 메인 콘텐츠 */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:.75rem;
+      background:#eff6ff;
+      color:#1d4ed8;
+      margin-right:6px;
     }
 
-    .welcome {
-      font-size: 1.2em;
-      font-weight: 600;
-      margin-bottom: 20px;
+    .metric-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+      gap:10px;
+      margin:8px 0 4px;
+    }
+    .metric-card{
+      border-radius:10px;
+      border:1px solid var(--border);
+      padding:8px 10px;
+      font-size:.82rem;
+    }
+    .metric-label{
+      color:var(--muted);
+      margin-bottom:2px;
+    }
+    .metric-value{
+      font-weight:600;
+      font-size:.92rem;
     }
 
-    .mood-text {
-      font-size: 1.5em;
-      color: #333;
-      margin-bottom: 40px;
+    .detail-section-title{
+      margin:12px 0 6px;
+      font-size:.95rem;
+      font-weight:600;
+    }
+    .detail-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.82rem;
+      margin-bottom:4px;
+    }
+    .detail-table th,
+    .detail-table td{
+      border:1px solid var(--border);
+      padding:5px 6px;
+      text-align:center;
+    }
+    .detail-table th{
+      background:#f9fafb;
+      font-weight:600;
+    }
+    .detail-note{
+      font-size:.8rem;
+      color:var(--muted);
+      margin-top:4px;
     }
 
-    .record-btn {
-      background-color: #0078ff;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.25s ease;
-    }
-
-    .record-btn:hover {
-      background-color: #005ec9;
+    @media(max-width:900px){
+      .page{flex-direction:column}
+      .sidebar{
+        width:100%;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+        max-height:220px;
+      }
+      .record-list{
+        max-height:120px;
+      }
+      .main{padding:20px 16px 24px}
     }
   </style>
 </head>
 <body>
-  <!-- 왼쪽 메뉴 -->
-  <div class="sidebar">
-    <h2 id="userName">님의 페이지</h2>
-    <div class="menu-item">내 기록</div>
-  </div>
+<div class="page">
+  <!-- 왼쪽 사이드바 -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-title" id="userName">님의 페이지</div>
+    </div>
 
-  <!-- 오른쪽 메인 -->
-  <div class="main-content">
+    <div>
+      <div class="sidebar-menu-title">내 기록</div>
+      <div class="sidebar-menu-label">아래에서 확인할 기록을 선택하세요.</div>
 
-    <button class="record-btn" onclick="createRecord()">내 기록 생성하기</button>
-  </div>
+      <div id="record-list" class="record-list">
+        <p id="records-empty" class="records-empty">
+          아직 저장된 기록이 없습니다.<br/>
+          시뮬레이터 / 비교하기 페이지에서 <b>저장하기</b>를 눌러 기록을 남겨보세요.
+        </p>
+      </div>
+    </div>
+  </aside>
 
-  <script>
-    // 로그인 정보 가져오기
+  <!-- 오른쪽 상세 영역 -->
+  <main class="main">
+    <section>
+      <h1 class="main-header-title">내 시뮬레이션 기록</h1>
+      <p class="main-header-desc">
+        CPU 스케줄링 / 페이지 교체 시뮬레이터 및 비교하기 페이지에서 저장한 기록을 한눈에 확인할 수 있습니다.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="go-sim-btn">시뮬레이터로 이동</button>
+        <button class="btn btn-secondary" id="delete-btn" disabled>기록 삭제</button>
+      </div>
+    </section>
+
+    <section class="detail-panel">
+      <div id="detail-empty" class="detail-empty">
+        왼쪽 목록에서 확인할 기록을 선택하세요.
+      </div>
+      <div id="detail-container" style="display:none"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+  let allRecords = [];
+  let selectedRecordId = null;
+  let deleteBtn; // ← 삭제 버튼 전역 변수
+
+  // type에 따른 라벨
+  function getTypeLabel(type) {
+    if (type === 'scheduling') return 'CPU 스케줄링';
+    if (type === 'paging') return '페이지 교체';
+    if (type === 'compare-scheduling') return 'CPU 스케줄링 비교';
+    if (type === 'compare-paging') return '페이지 교체 비교';
+    return '기타';
+  }
+
+  // 왼쪽 리스트 렌더링
+  function renderRecordList() {
+    const container = document.getElementById('record-list');
+    const empty = document.getElementById('records-empty');
+    container.innerHTML = '';
+
+    if (!allRecords || allRecords.length === 0) {
+      if (empty) empty.style.display = 'block';
+      container.appendChild(empty);
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+
+    const sorted = allRecords.slice().sort((a,b) => (b.id || 0) - (a.id || 0));
+
+    sorted.forEach(rec => {
+      const div = document.createElement('div');
+      div.className = 'record-item' + (rec.id === selectedRecordId ? ' active' : '');
+      div.dataset.id = rec.id;
+
+      const created = new Date(rec.created || 0);
+      const typeLabel = getTypeLabel(rec.type);
+
+      div.innerHTML = `
+        <div class="record-item-title">${rec.title || '(제목 없음)'}</div>
+        <div class="record-item-meta">
+          ${typeLabel} · ${created.toLocaleString()}
+        </div>
+      `;
+
+      div.addEventListener('click', () => {
+        selectRecord(rec.id);
+      });
+
+      container.appendChild(div);
+    });
+  }
+
+  // 상세 패널 렌더링
+  function renderRecordDetail(rec) {
+    const empty = document.getElementById('detail-empty');
+    const detail = document.getElementById('detail-container');
+
+    if (!rec) {
+      if (empty) empty.style.display = 'block';
+      if (detail) {
+        detail.style.display = 'none';
+        detail.innerHTML = '';
+      }
+      if (deleteBtn) deleteBtn.disabled = true;   // ← 선택된 기록 없으면 비활성화
+      return;
+    }
+
+    if (empty) empty.style.display = 'none';
+    detail.style.display = 'block';
+    if (deleteBtn) deleteBtn.disabled = false;    // ← 기록 선택되면 활성화
+
+    const data = rec.data || {};
+    const typeLabel = getTypeLabel(rec.type);
+    const created = new Date(rec.created || 0).toLocaleString();
+
+    let html = `
+      <div class="detail-title">${rec.title || '(제목 없음)'}</div>
+      <div class="detail-meta">
+        <span class="badge">${typeLabel}</span>
+        저장 시각: ${created}
+      </div>
+    `;
+
+    if (rec.type === 'scheduling') {
+      const m = data.metrics || {};
+      const procs = data.processes || [];
+      html += `
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-label">평균 대기 시간 (WT)</div>
+            <div class="metric-value">${(m.avgWT ?? m.avgWt ?? '-')}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">평균 반환 시간 (TAT)</div>
+            <div class="metric-value">${(m.avgTAT ?? '-')}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">평균 응답 시간 (RT)</div>
+            <div class="metric-value">${(m.avgRT ?? '-')}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Throughput</div>
+            <div class="metric-value">${(m.throughput ?? '-')} proc/unit</div>
+          </div>
+        </div>
+
+        <div class="detail-section-title">프로세스별 결과</div>
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>PID</th>
+              <th>도착 시간</th>
+              <th>버스트</th>
+              <th>시작</th>
+              <th>완료</th>
+              <th>WT</th>
+              <th>TAT</th>
+              <th>RT</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      procs.forEach(p => {
+        html += `
+          <tr>
+            <td>${p.pid}</td>
+            <td>${p.arrival}</td>
+            <td>${p.burst}</td>
+            <td>${p.start}</td>
+            <td>${p.finish}</td>
+            <td>${p.wait}</td>
+            <td>${p.turnaround}</td>
+            <td>${p.response}</td>
+          </tr>
+        `;
+      });
+      html += `
+          </tbody>
+        </table>
+        <div class="detail-note">
+          시뮬레이터에서 계산된 CPU 스케줄링 결과입니다.
+        </div>
+      `;
+    } else if (rec.type === 'paging') {
+      const refs = data.refs || data.references || [];
+      const faults = data.faults ?? data.totalFaults ?? data.total_faults;
+      const hits = data.hits ?? data.totalHits ?? data.total_hits;
+      const faultRate = data.faultRate ?? data.fault_rate;
+      const hitRate = data.hitRate ?? data.hit_rate;
+      const frames = data.frameCount ?? data.frames;
+
+      html += `
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-label">프레임 수</div>
+            <div class="metric-value">${frames ?? '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">총 Page Fault</div>
+            <div class="metric-value">${faults ?? '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">총 Hit</div>
+            <div class="metric-value">${hits ?? '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Fault / Hit Rate</div>
+            <div class="metric-value">
+              ${(faultRate ?? '-')}% / ${(hitRate ?? '-')}%
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section-title">참조 문자열</div>
+        <div style="font-size:.86rem;margin-bottom:6px;">
+          ${refs.map(r => r.page ?? r).join(' , ')}
+        </div>
+        <div class="detail-note">
+          같은 참조열을 다른 알고리즘에 적용하여 Page Fault 패턴을 비교할 수 있습니다.
+        </div>
+      `;
+    } else if (rec.type === 'compare-scheduling') {
+      html += `
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-label">시나리오</div>
+            <div class="metric-value">${data.scenarioLabel || data.scenario || '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">알고리즘 1</div>
+            <div class="metric-value">${data.alg1Label || data.alg1 || '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">알고리즘 2</div>
+            <div class="metric-value">${data.alg2Label || data.alg2 || '-'}</div>
+          </div>
+        </div>
+        <div class="detail-note">
+          Compare 페이지에서 설정한 시나리오와 알고리즘 조합입니다.
+          향후 실제 지표/간트차트 값을 연결하면 더 풍부한 비교가 가능합니다.
+        </div>
+      `;
+    } else if (rec.type === 'compare-paging') {
+      html += `
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-label">시나리오</div>
+            <div class="metric-value">${data.scenarioLabel || data.scenario || '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">프레임 수</div>
+            <div class="metric-value">${data.frames ?? '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">알고리즘 1</div>
+            <div class="metric-value">${data.alg1Label || data.alg1 || '-'}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">알고리즘 2</div>
+            <div class="metric-value">${data.alg2Label || data.alg2 || '-'}</div>
+          </div>
+        </div>
+        <div class="detail-note">
+          동일한 프레임 수와 참조 패턴에서 두 페이지 교체 알고리즘의 차이를 비교한 설정입니다.
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="detail-note">
+          이 기록 타입에 대한 상세 뷰가 아직 정의되어 있지 않습니다.
+        </div>
+      `;
+    }
+
+    detail.innerHTML = html;
+  }
+
+  function selectRecord(id) {
+    selectedRecordId = id;
+    const rec = allRecords.find(r => r.id === id);
+    renderRecordList();
+    renderRecordDetail(rec);
+  }
+
+  // 현재 선택된 기록 삭제
+  async function deleteCurrentRecord() {
+    const rec = allRecords.find(r => r.id === selectedRecordId);
+    if (!rec) {
+      alert('삭제할 기록을 먼저 선택해주세요.');
+      return;
+    }
+
+    const ok = confirm('이 기록을 삭제하시겠습니까?\n\n예: 확인 / 아니오: 취소');
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/records/${rec.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await res.json();
+      if (!data.ok) {
+        alert('삭제 실패: 서버에서 기록을 찾지 못했습니다.');
+        return;
+      }
+
+      // 프론트 배열에서도 제거
+      allRecords = allRecords.filter(r => r.id !== rec.id);
+
+      if (allRecords.length > 0) {
+        selectedRecordId = allRecords[0].id;
+      } else {
+        selectedRecordId = null;
+      }
+
+      renderRecordList();
+      renderRecordDetail(allRecords.find(r => r.id === selectedRecordId) || null);
+
+      alert('기록이 삭제되었습니다.');
+    } catch (e) {
+      console.error(e);
+      alert('삭제 중 오류가 발생했습니다.');
+    }
+  }
+
+  // /api/records 호출
+  async function loadRecords() {
+    try {
+      const res = await fetch('/api/records');
+      if (!res.ok) throw new Error('status ' + res.status);
+      allRecords = await res.json();
+
+      allRecords.sort((a,b) => (b.id || 0) - (a.id || 0));
+
+      if (allRecords.length > 0) {
+        selectedRecordId = allRecords[0].id;
+      } else {
+        selectedRecordId = null;
+      }
+
+      renderRecordList();
+      renderRecordDetail(allRecords.find(r => r.id === selectedRecordId) || null);
+    } catch (e) {
+      console.error(e);
+      alert('기록을 불러오는 중 오류가 발생했습니다.');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // 버튼 DOM 잡기
+    deleteBtn = document.getElementById('delete-btn');
+
+    // 로그인 여부 확인
     const user = sessionStorage.getItem('user');
-
-    if (user) {
+    if (user && user.trim() !== '') {
       document.getElementById('userName').innerText = `${user}님의 페이지`;
     } else {
       alert('로그인이 필요합니다.');
       window.location.href = 'login.html';
+      return;
     }
 
-    // 버튼 클릭 시 
-    function createRecord() {
-      alert('페이지이동 구현예정');
-      // 추후 기능 연결 시: window.location.href = 'record.html';
-    }
-  </script>
+    // 버튼 이벤트
+    document.getElementById('go-sim-btn').addEventListener('click', () => {
+      window.location.href = 'sim-scheduling.html';
+    });
+    // 기존 refresh-btn 리스너 대신 삭제 버튼에 연결
+    deleteBtn.addEventListener('click', deleteCurrentRecord);
+
+    // 첫 로딩 시 기록 불러오기
+    loadRecords();
+  });
+</script>
+
 </body>
 </html>

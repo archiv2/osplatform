@@ -164,15 +164,16 @@
 </head>
 <body>
 <header>
-  <div class="logo">OS Platform</div>
+  <a href="/index.html" class="logo">OS Platform</a>
+
   <nav>
     <!-- Learn -->
     <div class="dropdown">
       <span>Learn</span>
       <div class="dropdown-content">
-        <a href="/learn-scheduling.html">스케줄링</a>
-        <a href="/learn-paging.html">페이지교체</a>
-        <a href="/learn-deadlock.html">데드록</a>
+        <a href="/learn-scheduling.html">CPU Scheduling</a>
+        <a href="/learn-paging.html">Page Replacement</a>
+        <a href="/learn-deadlock.html">Deadlock</a>
       </div>
     </div>
 
@@ -180,28 +181,19 @@
     <div class="dropdown">
       <span>Simulator</span>
       <div class="dropdown-content">
-        <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
-        <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
-        <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
+        <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
+        <a href="/sim-paging.html">Page Replacement Simulator</a>
+        <a href="/sim-deadlock.html">Deadlock Simulator</a>
       </div>
     </div>
 
-    <!-- Compare (링크만) -->
+    <!-- Compare -->
     <div class="dropdown">
-      <span>
-        <a href="/compare.html" style="color:#fff;text-decoration:none">
-          Compare
-        </a>
-      </span>
-    </div>
-
-    <!-- Graph (링크만) -->
-    <div class="dropdown">
-      <span>
-        <a href="/graph-deadlock.html" style="color:#fff;text-decoration:none">
-          Graph
-        </a>
-      </span>
+      <span>Compare</span>
+      <div class="dropdown-content">
+        <a href="/compare-scheduling.html">Scheduling Algorithms Compare</a>
+        <a href="/compare-paging.html">Paging Algorithms Compare</a>
+      </div>
     </div>
   </nav>
 
@@ -607,5 +599,24 @@
     </div>
   </div>
 </div>
+// 로그인/프로필 버튼 유지
+document.addEventListener('DOMContentLoaded', () => {
+const container = document.getElementById('authArea');
+if (!container) return;
+const user = sessionStorage.getItem('user');
+
+if (user && user.trim() !== '') {
+container.innerHTML = `
+<button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+  <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4"></circle>
+    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+  </svg>
+</button>`;
+} else {
+container.innerHTML = `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+}
+});
+
 </body>
 </html>

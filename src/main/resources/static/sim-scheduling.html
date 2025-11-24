@@ -362,360 +362,409 @@
   </style>
 </head>
 <body>
-    <header>
-        <div class="logo">OS Platform</div>
-        <nav>
-          <div class="dropdown">
-            <span>Learn</span>
-            <div class="dropdown-content">
-              <a href="/learn-scheduling.html">스케줄링</a>
-              <a href="/learn-paging.html">페이지교체</a>
-              <a href="/learn-deadlock.html">데드록</a>
-            </div>
-          </div>
-    
-          <div class="dropdown">
-            <span>Simulator</span>
-            <div class="dropdown-content">
-              <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
-              <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
-              <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
-            </div>
-          </div>
-    
-          <div class="dropdown">
-            <span>
-              <a href="/compare-paging.html" style="color:#fff;text-decoration:none">
-                Compare
-              </a>
-            </span>
-          </div>
-    
-          <div class="dropdown">
-            <span>
-              <a href="/graph-paging.html" style="color:#fff;text-decoration:none">
-                Graph
-              </a>
-            </span>
-          </div>
-        </nav>
-    
-        <div class="actions">
-          <div id="authArea"></div>
-        </div>
-      </header>
-    
+<header>
+  <a href="/index.html" class="logo">OS Platform</a>
 
-  <div class="wrap">
-    <div class="eyebrow">SIM / CPU Scheduling</div>
-    <h1>CPU Scheduling Simulator</h1>
-    <p class="lead">
-      알고리즘과 프로세스 목록을 설정한 뒤, 시뮬레이션을 실행하면<br/>
-      Gantt 차트와 함께 <b>평균 WT / TAT / RT, Throughput</b>까지 한눈에 볼 수 있도록 설계된 페이지입니다.
-    </p>
-
-    <div class="sim-layout">
-      <!-- 설정 -->
-      <section class="panel" aria-label="시뮬레이션 설정">
-        <div class="panel-title">시뮬레이션 설정</div>
-        <div class="panel-sub">
-          알고리즘과 시간 단위를 선택한 뒤, 프로세스를 추가하고 <b>시뮬레이션 실행</b>을 눌러보세요.
-        </div>
-
-        <div class="control-row">
-          <div class="field">
-            <label for="algo-select">알고리즘 선택</label>
-            <select id="algo-select">
-              <option value="FCFS">FCFS (First Come First Served)</option>
-              <option value="SJF">SJF (Shortest Job First)</option>
-              <option value="RR">RR (Round Robin)</option>
-              <option value="SRT">SRT (Shortest Remaining Time)</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="time-unit">시간 단위</label>
-            <select id="time-unit">
-              <option value="sec">초 (seconds)</option>
-              <option value="ms">밀리초 (milliseconds)</option>
-            </select>
-          </div>
-
-          <div class="field" id="quantum-field" style="display:none;">
-            <label for="time-quantum">Time Quantum (RR 전용)</label>
-            <input type="number" id="time-quantum" min="1" value="4" />
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button type="button" class="btn" id="add-proc-btn">+ 프로세스 추가</button>
-          <button type="button" class="btn btn-danger" id="reset-btn">초기화</button>
-          <button type="button" class="btn btn-primary" id="run-btn">시뮬레이션 실행</button>
-        </div>
-
-        <table class="proc-table" aria-label="프로세스 목록">
-          <thead>
-            <tr>
-              <th style="width:70px;">PID</th>
-              <th style="width:110px;">도착 시간 (Arrival)</th>
-              <th style="width:110px;">버스트 시간 (Burst)</th>
-            </tr>
-          </thead>
-          <tbody id="proc-body">
-            <!-- JS에서 P1부터 추가 -->
-          </tbody>
-        </table>
-      </section>
-
-      <!-- 사용법 -->
-      <aside class="panel" aria-label="사용 방법">
-        <div class="panel-title">사용 방법 &amp; 팁</div>
-        <div class="panel-sub">
-          입력은 단순하게, 결과는 직관적으로 볼 수 있도록 구성했습니다.
-        </div>
-        <ul class="howto-list">
-          <li>
-            <span class="badge">1</span>
-            사용할 <b>스케줄링 알고리즘</b>과 <b>시간 단위</b>를 선택합니다.
-          </li>
-          <li>
-            <span class="badge">2</span>
-            <b>프로세스 추가</b> 버튼을 눌러 P1, P2, P3... 순서대로
-            <b>도착 시간 / 버스트 시간</b>을 입력합니다.
-          </li>
-          <li>
-            <span class="badge">3</span>
-            설정을 모두 마쳤다면 <b>시뮬레이션 실행</b>을 눌러
-            아래의 <b>Gantt 차트 / 지표 / 프로세스별 결과</b>를 확인합니다.
-          </li>
-          <li>
-            <span class="badge">4</span>
-            다른 케이스를 보고 싶다면 <b>초기화</b>로 목록을 지우고
-            새로운 프로세스 세트를 넣어 다시 실행할 수 있습니다.
-          </li>
-        </ul>
-
-        <div class="note-box">
-          현재 결과 계산은 프론트에서 FCFS 방식으로 <b>예시</b>만 보여줍니다.<br/>
-          실제 프로젝트에서는 이 부분을 백엔드 스케줄링 로직과 연결해
-          <b>정확한 WT / TAT / RT</b>를 가져오면 됩니다.
-        </div>
-      </aside>
+  <nav>
+    <!-- Learn -->
+    <div class="dropdown">
+      <span>Learn</span>
+      <div class="dropdown-content">
+        <a href="/learn-scheduling.html">CPU Scheduling</a>
+        <a href="/learn-paging.html">Page Replacement</a>
+        <a href="/learn-deadlock.html">Deadlock</a>
+      </div>
     </div>
 
-    <hr class="sep" />
+    <!-- Simulator -->
+    <div class="dropdown">
+      <span>Simulator</span>
+      <div class="dropdown-content">
+        <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
+        <a href="/sim-paging.html">Page Replacement Simulator</a>
+        <a href="/sim-deadlock.html">Deadlock Simulator</a>
+      </div>
+    </div>
 
-    <!-- 결과 영역 -->
-    <section class="panel" aria-label="시뮬레이션 결과">
-      <div class="panel-title">시뮬레이션 결과</div>
+    <!-- Compare -->
+    <div class="dropdown">
+      <span>Compare</span>
+      <div class="dropdown-content">
+        <a href="/compare-scheduling.html">Scheduling Algorithms Compare</a>
+        <a href="/compare-paging.html">Paging Algorithms Compare</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="actions">
+    <div id="authArea"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="eyebrow">SIM / CPU Scheduling</div>
+  <h1>CPU Scheduling Simulator</h1>
+  <p class="lead">
+    알고리즘과 프로세스 목록을 설정한 뒤, 시뮬레이션을 실행하면<br />
+    Gantt 차트와 함께 <b>평균 WT / TAT / RT, Throughput</b>까지 한눈에 볼 수 있도록 설계된 페이지입니다.
+  </p>
+
+  <div class="sim-layout">
+    <!-- 설정 -->
+    <section class="panel" aria-label="시뮬레이션 설정">
+      <div class="panel-title">시뮬레이션 설정</div>
       <div class="panel-sub">
-        위 설정으로 실행한 결과가 이 영역에 표시됩니다. Gantt 차트, 핵심 지표, 프로세스별 시간 정보를 한 번에 확인하세요.
+        알고리즘과 시간 단위를 선택한 뒤, 프로세스를 추가하고 <b>시뮬레이션 실행</b>을 눌러보세요.
       </div>
 
-      <div class="chart-shell">
-        <div class="chart-placeholder" id="chart-placeholder">
-아직 시뮬레이션이 실행되지 않았습니다.
-실행 후 이 영역에 Gantt Chart / 타임라인 시각화가 표시됩니다.
+      <div class="control-row">
+        <div class="field">
+          <label for="algo-select">알고리즘 선택</label>
+          <select id="algo-select">
+            <option value="FCFS">FCFS (First Come First Served)</option>
+            <option value="SJF">SJF (Shortest Job First)</option>
+            <option value="RR">RR (Round Robin)</option>
+            <option value="SRT">SRT (Shortest Remaining Time)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="time-unit">시간 단위</label>
+          <select id="time-unit">
+            <option value="sec">초 (seconds)</option>
+            <option value="ms">밀리초 (milliseconds)</option>
+          </select>
+        </div>
+
+        <div class="field" id="quantum-field" style="display:none;">
+          <label for="time-quantum">Time Quantum (RR 전용)</label>
+          <input type="number" id="time-quantum" min="1" value="4" />
         </div>
       </div>
 
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-label">평균 대기 시간 (Avg WT)</div>
-          <div><span class="metric-value" id="avg-wt">–</span><span class="metric-unit" id="wt-unit"></span></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">평균 반환 시간 (Avg TAT)</div>
-          <div><span class="metric-value" id="avg-tat">–</span><span class="metric-unit" id="tat-unit"></span></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">평균 응답 시간 (Avg RT)</div>
-          <div><span class="metric-value" id="avg-rt">–</span><span class="metric-unit" id="rt-unit"></span></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Throughput (단위 시간당 완료 수)</div>
-          <div><span class="metric-value" id="throughput">–</span><span class="metric-unit">proc / unit</span></div>
-        </div>
+      <div class="btn-row">
+        <button type="button" class="btn" id="add-proc-btn">+ 프로세스 추가</button>
+        <button type="button" class="btn btn-danger" id="reset-btn">초기화</button>
+        <button type="button" class="btn btn-primary" id="run-btn">시뮬레이션 실행</button>
       </div>
 
-      <table class="result-table" aria-label="프로세스별 시뮬레이션 결과">
+      <table class="proc-table" aria-label="프로세스 목록">
         <thead>
-          <tr>
-            <th>PID</th>
-            <th>도착 시간</th>
-            <th>버스트 시간</th>
-            <th>시작 시각</th>
-            <th>완료 시각</th>
-            <th>대기 시간 (WT)</th>
-            <th>반환 시간 (TAT)</th>
-            <th>응답 시간 (RT)</th>
-          </tr>
+        <tr>
+          <th style="width:70px;">PID</th>
+          <th style="width:110px;">도착 시간 (Arrival)</th>
+          <th style="width:110px;">버스트 시간 (Burst)</th>
+        </tr>
         </thead>
-        <tbody id="result-body">
-          <tr>
-            <td colspan="8" class="result-placeholder">
-              시뮬레이션을 실행하면 여기에서 각 프로세스의 시간 정보를 확인할 수 있습니다.
-            </td>
-          </tr>
+        <tbody id="proc-body">
+        <!-- JS에서 P1부터 추가 -->
         </tbody>
       </table>
-
-      <div class="run-info" id="run-info">
-        아직 실행 기록이 없습니다.
-      </div>
     </section>
+
+    <!-- 사용법 -->
+    <aside class="panel" aria-label="사용 방법">
+      <div class="panel-title">사용 방법 &amp; 팁</div>
+      <div class="panel-sub">
+        입력은 단순하게, 결과는 직관적으로 볼 수 있도록 구성했습니다.
+      </div>
+      <ul class="howto-list">
+        <li>
+          <span class="badge">1</span>
+          사용할 <b>스케줄링 알고리즘</b>과 <b>시간 단위</b>를 선택합니다.
+        </li>
+        <li>
+          <span class="badge">2</span>
+          <b>프로세스 추가</b> 버튼을 눌러 P1, P2, P3... 순서대로
+          <b>도착 시간 / 버스트 시간</b>을 입력합니다.
+        </li>
+        <li>
+          <span class="badge">3</span>
+          설정을 모두 마쳤다면 <b>시뮬레이션 실행</b>을 눌러
+          아래의 <b>Gantt 차트 / 지표 / 프로세스별 결과</b>를 확인합니다.
+        </li>
+        <li>
+          <span class="badge">4</span>
+          다른 케이스를 보고 싶다면 <b>초기화</b>로 목록을 지우고
+          새로운 프로세스 세트를 넣어 다시 실행할 수 있습니다.
+        </li>
+      </ul>
+
+      <div class="note-box">
+        현재는 프론트 입력을 받아 <b>백엔드 스케줄링 API</b>에 요청을 보내
+        WT / TAT / RT 등을 계산합니다.
+      </div>
+    </aside>
   </div>
 
-  <script>
-    // --- 로그인 / 프로필 버튼 ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('authArea');
-      if (container) {
-        const user = sessionStorage.getItem('user');
-        container.innerHTML = (user && user.trim() !== '')
-          ? `
-          <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
-            <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="8" r="4"></circle>
-              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-            </svg>
-          </button>`
-          : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+  <hr class="sep" />
+
+  <!-- 결과 영역 -->
+  <section class="panel" aria-label="시뮬레이션 결과">
+    <div class="panel-title">시뮬레이션 결과</div>
+    <div class="panel-sub">
+      위 설정으로 실행한 결과가 이 영역에 표시됩니다. Gantt 차트, 핵심 지표, 프로세스별 시간 정보를 한 번에 확인하세요.
+    </div>
+
+    <div class="chart-shell">
+      <div class="chart-placeholder" id="chart-placeholder">
+        아직 시뮬레이션이 실행되지 않았습니다.
+        실행 후 이 영역에 Gantt Chart / 타임라인 시각화가 표시됩니다.
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">평균 대기 시간 (Avg WT)</div>
+        <div><span class="metric-value" id="avg-wt">–</span><span class="metric-unit" id="wt-unit"></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">평균 반환 시간 (Avg TAT)</div>
+        <div><span class="metric-value" id="avg-tat">–</span><span class="metric-unit" id="tat-unit"></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">평균 응답 시간 (Avg RT)</div>
+        <div><span class="metric-value" id="avg-rt">–</span><span class="metric-unit" id="rt-unit"></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Throughput (단위 시간당 완료 수)</div>
+        <div><span class="metric-value" id="throughput">–</span><span class="metric-unit">proc / unit</span></div>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin: 14px 0 4px; gap: 8px">
+      <button type="button" class="btn" id="save-scheduling-record-btn">
+        결과 저장하기
+      </button>
+    </div>
+
+    <table class="result-table" aria-label="프로세스별 시뮬레이션 결과">
+      <thead>
+      <tr>
+        <th>PID</th>
+        <th>도착 시간</th>
+        <th>버스트 시간</th>
+        <th>시작 시각</th>
+        <th>완료 시각</th>
+        <th>대기 시간 (WT)</th>
+        <th>반환 시간 (TAT)</th>
+        <th>응답 시간 (RT)</th>
+      </tr>
+      </thead>
+      <tbody id="result-body">
+      <tr>
+        <td colspan="8" class="result-placeholder">
+          시뮬레이션을 실행하면 여기에서 각 프로세스의 시간 정보를 확인할 수 있습니다.
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="run-info" id="run-info">
+      아직 실행 기록이 없습니다.
+    </div>
+  </section>
+</div>
+
+<script>
+  let lastSchedulingResult = null;
+  // --- 로그인 / 프로필 버튼 ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('authArea');
+    if (container) {
+      const user = sessionStorage.getItem('user');
+      container.innerHTML = (user && user.trim() !== '')
+        ? `
+        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </button>`
+        : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+    }
+  });
+
+  // --- 프로세스 추가/초기화 로직 ---
+  let procCount = 0;
+
+  function createProcRow(pidLabel, arrival = 0, burst = 1) {
+    const tbody = document.getElementById('proc-body');
+
+    const placeholder = tbody.querySelector('.empty-row');
+    if (placeholder) placeholder.remove();
+
+    const tr = document.createElement('tr');
+
+    const tdPid = document.createElement('td');
+    tdPid.className = 'pid-cell';
+    tdPid.textContent = pidLabel;
+
+    const tdArr = document.createElement('td');
+    const inputArr = document.createElement('input');
+    inputArr.type = 'number';
+    inputArr.min = '0';
+    inputArr.step = '1';
+    inputArr.value = arrival;
+    inputArr.setAttribute('aria-label', pidLabel + ' 도착 시간');
+    tdArr.appendChild(inputArr);
+
+    const tdBurst = document.createElement('td');
+    const inputBurst = document.createElement('input');
+    inputBurst.type = 'number';
+    inputBurst.min = '1';
+    inputBurst.step = '1';
+    inputBurst.value = burst;
+    inputBurst.setAttribute('aria-label', pidLabel + ' 버스트 시간');
+    tdBurst.appendChild(inputBurst);
+
+    tr.appendChild(tdPid);
+    tr.appendChild(tdArr);
+    tr.appendChild(tdBurst);
+
+    tbody.appendChild(tr);
+  }
+
+  function addProcess() {
+    procCount += 1;
+    const pidLabel = 'P' + procCount;
+    createProcRow(pidLabel);
+  }
+
+  function resetSim() {
+    const tbody = document.getElementById('proc-body');
+    tbody.innerHTML = '';
+    procCount = 0;
+    addProcess(); // 기본 P1 한 줄
+
+    // 지표 리셋
+    document.getElementById('avg-wt').textContent = '–';
+    document.getElementById('avg-tat').textContent = '–';
+    document.getElementById('avg-rt').textContent = '–';
+    document.getElementById('throughput').textContent = '–';
+    document.getElementById('wt-unit').textContent = '';
+    document.getElementById('tat-unit').textContent = '';
+    document.getElementById('rt-unit').textContent = '';
+    document.getElementById('result-body').innerHTML =
+      '<tr><td colspan="8" class="result-placeholder">시뮬레이션을 실행하면 여기에서 각 프로세스의 시간 정보를 확인할 수 있습니다.</td></tr>';
+    document.getElementById('run-info').textContent = '아직 실행 기록이 없습니다.';
+
+    const chartBox = document.getElementById('chart-placeholder');
+    chartBox.textContent =
+'아직 시뮬레이션이 실행되지 않았습니다.\n실행 후 이 영역에 Gantt Chart / 타임라인 시각화가 표시됩니다.';
+  }
+
+  // --- 백엔드 연동 시뮬레이션 실행 ---
+  async function runSimulation() {
+    const algo = document.getElementById('algo-select').value;   // FCFS / RR / ...
+    const timeUnit = document.getElementById('time-unit').value; // sec/ms (표시용)
+    const unitText = (timeUnit === 'ms') ? ' ms' : ' sec';
+
+    const tbody = document.getElementById('proc-body');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // 1) 화면에서 프로세스 입력값 수집
+    const processes = [];
+    rows.forEach((row, idx) => {
+      const pid = row.querySelector('.pid-cell')?.textContent?.trim() || `P${idx + 1}`;
+      const inputs = row.querySelectorAll('input');
+      if (inputs.length < 2) return;
+
+      const arrival = parseInt(inputs[0].value, 10);
+      const burst = parseInt(inputs[1].value, 10);
+
+      if (!Number.isNaN(arrival) && !Number.isNaN(burst) && burst > 0) {
+        processes.push({ pid, arrival, burst });
       }
     });
 
-    // --- 프로세스 추가/초기화 로직 ---
-    let procCount = 0;
-
-    function createProcRow(pidLabel, arrival = 0, burst = 1) {
-      const tbody = document.getElementById('proc-body');
-
-      const placeholder = tbody.querySelector('.empty-row');
-      if (placeholder) placeholder.remove();
-
-      const tr = document.createElement('tr');
-
-      const tdPid = document.createElement('td');
-      tdPid.className = 'pid-cell';
-      tdPid.textContent = pidLabel;
-
-      const tdArr = document.createElement('td');
-      const inputArr = document.createElement('input');
-      inputArr.type = 'number';
-      inputArr.min = '0';
-      inputArr.step = '1';
-      inputArr.value = arrival;
-      inputArr.setAttribute('aria-label', pidLabel + ' 도착 시간');
-      tdArr.appendChild(inputArr);
-
-      const tdBurst = document.createElement('td');
-      const inputBurst = document.createElement('input');
-      inputBurst.type = 'number';
-      inputBurst.min = '1';
-      inputBurst.step = '1';
-      inputBurst.value = burst;
-      inputBurst.setAttribute('aria-label', pidLabel + ' 버스트 시간');
-      tdBurst.appendChild(inputBurst);
-
-      tr.appendChild(tdPid);
-      tr.appendChild(tdArr);
-      tr.appendChild(tdBurst);
-
-      tbody.appendChild(tr);
+    if (processes.length === 0) {
+      alert('프로세스를 한 개 이상 입력해주세요.');
+      return;
     }
 
-    function addProcess() {
-      procCount += 1;
-      const pidLabel = 'P' + procCount;
-      createProcRow(pidLabel);
+    // RR일 때만 time quantum 사용
+    let quantum = null;
+    if (algo === 'RR') {
+      const q = parseInt(document.getElementById('time-quantum').value, 10);
+      quantum = (!q || q <= 0) ? 1 : q;
     }
 
-    function resetSim() {
-      const tbody = document.getElementById('proc-body');
-      tbody.innerHTML = '';
-      procCount = 0;
-      addProcess(); // 기본 P1 한 줄
-
-      // 지표 리셋
-      document.getElementById('avg-wt').textContent = '–';
-      document.getElementById('avg-tat').textContent = '–';
-      document.getElementById('avg-rt').textContent = '–';
-      document.getElementById('throughput').textContent = '–';
-      document.getElementById('wt-unit').textContent = '';
-      document.getElementById('tat-unit').textContent = '';
-      document.getElementById('rt-unit').textContent = '';
-      document.getElementById('result-body').innerHTML =
-        '<tr><td colspan="8" class="result-placeholder">시뮬레이션을 실행하면 여기에서 각 프로세스의 시간 정보를 확인할 수 있습니다.</td></tr>';
-      document.getElementById('run-info').textContent = '아직 실행 기록이 없습니다.';
-
-      const chartBox = document.getElementById('chart-placeholder');
-      chartBox.textContent =
-'아직 시뮬레이션이 실행되지 않았습니다.\n실행 후 이 영역에 Gantt Chart / 타임라인 시각화가 표시됩니다.';
-    }
-
-    // --- 시뮬레이션 실행 (간단 FCFS 예시 계산) ---
-    function runSimulation() {
-      const algo = document.getElementById('algo-select').value;
-      const timeUnit = document.getElementById('time-unit').value;
-      const unitText = (timeUnit === 'ms') ? ' ms' : ' sec';
-
-      const tbody = document.getElementById('proc-body');
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const procs = [];
-
-      rows.forEach((row, idx) => {
-        const pid = row.querySelector('.pid-cell')?.textContent?.trim();
-        const inputs = row.querySelectorAll('input');
-        if (!pid || inputs.length < 2) return;
-        const arrival = parseInt(inputs[0].value, 10);
-        const burst = parseInt(inputs[1].value, 10);
-        if (!Number.isNaN(arrival) && !Number.isNaN(burst) && burst > 0) {
-          procs.push({ pid, arrival, burst, index: idx });
-        }
+    try {
+      // 2) 백엔드로 요청 보내기
+      const res = await fetch('/api/sim/scheduling', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ algo, quantum, processes })
       });
 
-      if (procs.length === 0) {
-        alert('최소 1개 이상의 프로세스를 입력해야 합니다.');
-        return;
+      if (!res.ok) {
+        throw new Error('서버 오류: ' + res.status);
       }
 
-      // 여기서는 FCFS 기준으로만 간단 계산 예시 (algo 선택 값과 상관없이 예시용)
-      procs.sort((a,b) => a.arrival === b.arrival ? a.index - b.index : a.arrival - b.arrival);
+      const data = await res.json();
+      const gantt = data.gantt || [];
+      const metrics = data.metrics || {};
 
-      let time = 0;
-      let totalWT = 0, totalTAT = 0, totalRT = 0;
+      // 3) Gantt 결과로 각 프로세스의 start/finish/WT/TAT/RT 계산
+      const firstStart = {};
+      const endTime = {};
 
-      procs.forEach(p => {
-        if (time < p.arrival) time = p.arrival;
-        p.start = time;
-        p.wait = time - p.arrival;
-        p.response = p.wait;              // FCFS에서는 RT = WT
-        time += p.burst;
-        p.finish = time;
-        p.turnaround = p.finish - p.arrival;
+      gantt.forEach(slot => {
+        const pid = slot.pid;
+        const start = slot.start;
+        const end = slot.end;
 
-        totalWT += p.wait;
-        totalTAT += p.turnaround;
-        totalRT += p.response;
+        if (!(pid in firstStart) || start < firstStart[pid]) {
+          firstStart[pid] = start;
+        }
+        endTime[pid] = Math.max(endTime[pid] ?? 0, end);
       });
 
-      const avgWT = (totalWT / procs.length).toFixed(2);
-      const avgTAT = (totalTAT / procs.length).toFixed(2);
-      const avgRT = (totalRT / procs.length).toFixed(2);
-      const throughput = (procs.length / (time || 1)).toFixed(3);
+      const detailedProcs = processes.map(p => {
+        const fs = firstStart[p.pid] ?? 0;
+        const e = endTime[p.pid] ?? fs;
+        const turnaround = e - p.arrival;
+        const waiting = turnaround - p.burst;
+        const response = fs - p.arrival;
+        return {
+          ...p,
+          start: fs,
+          finish: e,
+          wait: waiting,
+          turnaround,
+          response
+        };
+      });
 
+      // 총 실행 시간 = gantt에서 가장 큰 end
+      const totalTime = gantt.reduce((max, s) => Math.max(max, s.end || 0), 0);
+
+      // 평균값: 백엔드가 준 metrics 우선 사용
+      const avgWT = metrics.avgWaiting ?? (
+        detailedProcs.reduce((sum, p) => sum + p.wait, 0) / detailedProcs.length
+      );
+      const avgTAT = metrics.avgTurnaround ?? (
+        detailedProcs.reduce((sum, p) => sum + p.turnaround, 0) / detailedProcs.length
+      );
+      const avgRT = metrics.avgResponse ?? (
+        detailedProcs.reduce((sum, p) => sum + p.response, 0) / detailedProcs.length
+      );
+      const throughput = (detailedProcs.length / (totalTime || 1)).toFixed(3);
+
+      // 4) 상단 요약 영역 업데이트
       document.getElementById('wt-unit').textContent = unitText;
       document.getElementById('tat-unit').textContent = unitText;
       document.getElementById('rt-unit').textContent = unitText;
-      document.getElementById('avg-wt').textContent = avgWT;
-      document.getElementById('avg-tat').textContent = avgTAT;
-      document.getElementById('avg-rt').textContent = avgRT;
+      document.getElementById('avg-wt').textContent = Number(avgWT).toFixed(2);
+      document.getElementById('avg-tat').textContent = Number(avgTAT).toFixed(2);
+      document.getElementById('avg-rt').textContent = Number(avgRT).toFixed(2);
       document.getElementById('throughput').textContent = throughput;
 
-      // 결과 테이블 채우기
+      // 5) 프로세스별 결과 테이블 채우기
       const resultBody = document.getElementById('result-body');
       resultBody.innerHTML = '';
-      procs.forEach(p => {
+      detailedProcs.forEach(p => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${p.pid}</td>
@@ -730,58 +779,116 @@
         resultBody.appendChild(tr);
       });
 
-      // 차트 영역에는 실행 순서/총 실행시간 정도만 텍스트로
-      const order = procs.map(p => p.pid).join(' → ');
+      // 6) Gantt 요약 텍스트
+      const order = gantt.map(g => g.pid).join(' → ');
       const chartBox = document.getElementById('chart-placeholder');
       chartBox.textContent =
-`[예시 Gantt 정보]
+`[백엔드 결과 기반 Gantt 정보]
 실행 순서: ${order}
-총 실행 시간: ${time}${unitText}
-(실제 프로젝트에서는 이 영역에 Gantt 차트를 그려 사용하면 됩니다.)`;
+총 실행 시간: ${totalTime}${unitText}
+(추후 이 영역에 실제 Gantt 차트를 그려서 사용할 수 있습니다.)`;
 
+      // 7) 마지막 실행 정보
       const now = new Date();
       const info = [
         '마지막 실행: ',
         now.toLocaleDateString(), ' ',
         now.toLocaleTimeString(),
         ' | 선택 알고리즘: ', algo,
-        ' | 프로세스 수: ', procs.length
+        (algo === 'RR' ? ` (Q=${quantum})` : ''),
+        ' | 프로세스 수: ', detailedProcs.length,
+        ' | 총 실행 시간: ', totalTime, unitText
       ].join('');
       document.getElementById('run-info').textContent = info;
+
+      lastSchedulingResult = {
+      type: 'scheduling',
+      title: `CPU Scheduling (${algo}${algo === 'RR' ? `, Q=${quantum}` : ''})`,
+      algo,
+      quantum,
+      timeUnit,
+      totalTime,
+      metrics: {
+        avgWT: Number(avgWT),
+        avgTAT: Number(avgTAT),
+        avgRT: Number(avgRT),
+        throughput: Number(throughput)
+      },
+      processes: detailedProcs
+    };
+
+
+    } catch (err) {
+      console.error(err);
+      alert('시뮬레이션 중 오류가 발생했습니다.');
     }
+  }
 
-    // --- 알고리즘별 Time Quantum 필드 토글 ---
-    function handleAlgoChange() {
-      const algo = document.getElementById('algo-select').value;
-      const qField = document.getElementById('quantum-field');
-      qField.style.display = (algo === 'RR') ? 'flex' : 'none';
+  // --- 알고리즘별 Time Quantum 필드 토글 ---
+  function handleAlgoChange() {
+    const algo = document.getElementById('algo-select').value;
+    const qField = document.getElementById('quantum-field');
+    qField.style.display = (algo === 'RR') ? 'flex' : 'none';
+  }
+
+  // --- 리액트(3000)에서 8080으로 링크 강제 ---
+  (function () {
+    if (location.port === '3000') {
+      document.querySelectorAll('.dropdown-content a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href.startsWith('/')) {
+          a.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.location.assign('http://localhost:8080' + href);
+          });
+        }
+      });
     }
+  })();
 
-    // --- 리액트(3000)에서 8080으로 링크 강제 ---
-    (function () {
-      if (location.port === '3000') {
-        document.querySelectorAll('.dropdown-content a').forEach(a => {
-          const href = a.getAttribute('href');
-          if (href && href.startsWith('/')) {
-            a.addEventListener('click', function(e){
-              e.preventDefault();
-              window.location.assign('http://localhost:8080' + href);
-            });
-          }
-        });
-      }
-    })();
+  async function saveSchedulingRecord() {
+  if (!lastSchedulingResult) {
+    alert('먼저 시뮬레이션을 실행해주세요.');
+    return;
+  }
 
-    // 초기 세팅
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('add-proc-btn').addEventListener('click', addProcess);
-      document.getElementById('reset-btn').addEventListener('click', resetSim);
-      document.getElementById('run-btn').addEventListener('click', runSimulation);
-      document.getElementById('algo-select').addEventListener('change', handleAlgoChange);
-
-      resetSim();
-      handleAlgoChange();
+  try {
+    const res = await fetch('/api/records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lastSchedulingResult)
     });
-  </script>
+
+    if (!res.ok) {
+      throw new Error('status ' + res.status);
+    }
+
+    alert('저장하였습니다. 마이페이지에서 확인하세요.');
+  } catch (e) {
+    console.error(e);
+    alert('저장 중 오류가 발생했습니다.');
+  }
+}
+
+
+  // 초기 세팅
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('add-proc-btn').addEventListener('click', addProcess);
+    document.getElementById('reset-btn').addEventListener('click', resetSim);
+    document.getElementById('run-btn').addEventListener('click', runSimulation);
+    document.getElementById('algo-select').addEventListener('change', handleAlgoChange);
+
+    document.getElementById('save-scheduling-record-btn')
+  .addEventListener('click', saveSchedulingRecord);
+
+
+    resetSim();
+    handleAlgoChange();
+  });
+
+
+
+</script>
 </body>
+
 </html>
