@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compare | CPU 스케줄링 - OS Platform</title>
+  <style>
+    :root{
+      --bg:#000;--bg-2:#0a0a0a;--panel:#111;--panel-2:#131313;--line:#222;
+      --text:#fff;--muted:#b9c2cc;--accent:#00bfff;--btn:#0078ff;--btn-hover:#005ec9;
+      --good:#0ecb81;--warn:#ffcc00;--bad:#ff5c5c;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,system-ui,-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    /* header – Learn 페이지와 동일한 드롭다운 스타일 */
+    header{
+      position:sticky;top:0;z-index:20;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)
+    }
+    .logo{font-size:1.4em;font-weight:700;color:var(--accent)}
+    nav{display:flex;align-items:center;gap:150px}
+    .dropdown{position:relative;display:inline-block;padding:6px 0;cursor:pointer}
+    .dropdown::after{
+      content:" ⌄";display:inline-block;font-size:.8em;color:#ccc;
+      transition:transform .25s ease,color .25s ease
+    }
+    .dropdown:hover::after{transform:rotate(180deg);color:var(--accent)}
+    .dropdown-content{
+      display:none;position:absolute;background:#111;min-width:180px;
+      box-shadow:0 8px 16px rgba(0,0,0,.3);z-index:10
+    }
+    .dropdown-content a{
+      color:#fff;padding:10px 14px;text-decoration:none;display:block
+    }
+    .dropdown-content a:hover{background:#333}
+    .dropdown:hover .dropdown-content{display:block}
+    .dropdown > span > a{color:#fff;text-decoration:none}
+    .actions{display:flex;align-items:center;gap:20px}
+    #authArea{}
+    @media (max-width:880px){
+      header{padding:16px 20px;flex-wrap:wrap;gap:12px}
+      nav{gap:40px}
+    }
+
+    /* 본문 레이아웃 */
+    main{max-width:1120px;margin:0 auto;padding:26px 20px 60px}
+
+    h1{font-size:1.8rem;margin:4px 0 8px}
+    .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:20px}
+
+    .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .pill{
+      border-radius:999px;border:1px solid var(--line);
+      padding:4px 10px;font-size:.8rem;color:var(--muted);
+      display:inline-flex;align-items:center;gap:4px;
+    }
+    .pill span.dot{
+      width:7px;height:7px;border-radius:50%;background:var(--accent);
+    }
+
+    .panel{
+      background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px 20px 18px;
+      margin-bottom:18px;
+    }
+    .panel h2{
+      font-size:1.15rem;
+      margin:0 0 6px;
+    }
+    .panel .sub{
+      font-size:.9rem;color:var(--muted);margin:0 0 12px;
+    }
+
+    /* 상단 고정 비교표 */
+    .alg-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.9rem;
+    }
+    .alg-table thead{
+      background:rgba(255,255,255,.02);
+    }
+    .alg-table th,
+    .alg-table td{
+      border:1px solid var(--line);
+      padding:8px 10px;
+      vertical-align:top;
+    }
+    .alg-table th{
+      text-align:left;
+      font-size:.85rem;
+      color:#dbe9f5;
+    }
+    .alg-col-name{
+      font-weight:600;
+      color:#e6f7ff;
+      white-space:nowrap;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:.75rem;
+      border:1px solid var(--line);
+      color:var(--muted);
+      margin-right:4px;
+      margin-bottom:3px;
+    }
+    .tag.preempt{border-color:var(--accent);color:var(--accent)}
+    .tag.nonpreempt{border-color:#888;color:#cdd6e0}
+    .tag-good{color:var(--good)}
+    .tag-warn{color:var(--warn)}
+    .tag-bad{color:var(--bad)}
+
+    /* 하단 직접 비교 영역 */
+    .section-title{
+      margin:26px 0 8px;
+      font-size:1.25rem;
+    }
+    .section-desc{
+      margin:0 0 14px;
+      font-size:.92rem;
+      color:var(--muted);
+    }
+
+    .scenario-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .scenario-row-left{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted)}
+    select{
+      background:#050506;
+      color:var(--text);
+      border-radius:10px;
+      border:1px solid var(--line);
+      padding:6px 10px;
+      font-size:.88rem;
+      min-width:130px;
+    }
+
+    .compare-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:16px;
+      margin-top:6px;
+    }
+    .compare-card{
+      background:linear-gradient(180deg,#0e0e0e 0%,#101018 100%);
+      border-radius:16px;
+      border:1px solid var(--line);
+      padding:14px 16px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .compare-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .compare-title{
+      font-size:.95rem;
+      font-weight:600;
+    }
+    .compare-meta{
+      font-size:.8rem;color:var(--muted);
+    }
+    .mini-label{font-size:.78rem;color:var(--muted);margin-bottom:3px}
+
+    .metric-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.83rem;
+      margin-top:2px;
+    }
+    .metric-table th,
+    .metric-table td{
+      border:1px solid var(--line);
+      padding:5px 6px;
+    }
+    .metric-table th{
+      text-align:left;
+      color:#dbe9f5;
+      width:40%;
+    }
+    .metric-table td.placeholder{
+      color:#6f7b88;
+      font-style:italic;
+    }
+
+    .gantt-box{
+      border-radius:10px;
+      border:1px dashed var(--line);
+      padding:10px;
+      font-size:.8rem;
+      color:#778495;
+      text-align:center;
+    }
+
+    .compare-note{
+      margin-top:12px;
+      font-size:.84rem;
+      color:var(--muted);
+      border-top:1px dashed var(--line);
+      padding-top:10px;
+    }
+
+    .comment-panel{
+      margin-top:14px;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px dashed var(--line);
+      font-size:.86rem;
+      color:var(--muted);
+    }
+    .comment-panel span{
+      color:var(--accent);
+    }
+
+    @media(max-width:900px){
+      main{padding:22px 16px 50px}
+      .compare-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">OS Platform</div>
+    <nav>
+      <!-- Learn -->
+      <div class="dropdown">
+        <span>Learn</span>
+        <div class="dropdown-content">
+          <a href="/learn-scheduling.html">스케줄링</a>
+          <a href="/learn-paging.html">페이지교체</a>
+          <a href="/learn-deadlock.html">데드록</a>
+        </div>
+      </div>
+
+      <!-- Simulator -->
+      <div class="dropdown">
+        <span>Simulator</span>
+        <div class="dropdown-content">
+          <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
+          <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
+          <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
+        </div>
+      </div>
+
+      <!-- Compare -->
+      <div class="dropdown">
+        <span>
+          <a href="/compare-scheduling.html" style="color:#fff;text-decoration:none">
+            Compare
+          </a>
+        </span>
+      </div>
+
+      <!-- Graph -->
+      <div class="dropdown">
+        <span>
+          <a href="/graph-deadlock.html" style="color:#fff;text-decoration:none">
+            Graph
+          </a>
+        </span>
+      </div>
+    </nav>
+
+    <div class="actions">
+      <div id="authArea"></div>
+    </div>
+  </header>
+
+  <main>
+    <h1>CPU Scheduling Algorithm Compare</h1>
+    <p class="subtitle">
+      알고리즘 4개를 한눈에 비교해서 보거나,<br />
+      원하는 알고리즘을 선택해 시나리오별 알고리즘 결과를 비교할 수 있습니다.
+    </p>
+
+    <!-- 상단 고정 비교표 -->
+    <section class="panel">
+      <h2>알고리즘 한눈에 보기</h2>
+      <p class="sub">
+        입력 시나리오와 상관없이 변하지 않는 알고리즘 4가지 핵심 차이
+      </p>
+
+      <table class="alg-table">
+        <thead>
+          <tr>
+            <th style="width:110px">Algorithm</th>
+            <th style="width:110px">Preemptive 여부</th>
+            <th>스케줄링 기준</th>
+            <th>요구 정보</th>
+            <th>장점</th>
+            <th>단점 / 기아 위험</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="alg-col-name">FCFS</td>
+            <td>
+              <span class="tag nonpreempt">Non-preemptive</span>
+            </td>
+            <td>
+              도착 순서대로 CPU를 배분하는 방식
+            </td>
+            <td>
+              <span class="tag">도착 시간(Arrival)</span>
+            </td>
+            <td>
+              구현이 매우 단순하며, 도착 순서 기반이라 <span class="tag-good">기아(starvation)가 발생하지 않음.</span>
+            </td>
+            <td>
+              긴 작업이 앞에 있으면 전체 응답성이 크게 저하되며,
+              짧은 작업이 뒤로 밀리는 <span class="tag-warn">Convoy effect</span>가 발생
+            </td>
+          </tr>
+
+          <tr>
+            <td class="alg-col-name">SJF</td>
+            <td>
+              <span class="tag nonpreempt">Non-preemptive</span>
+            </td>
+            <td>
+              예상 CPU Burst Time이 가장 짧은 프로세스를 우선 실행하는 방식
+            </td>
+            <td>
+              <span class="tag">CPU burst 길이 추정</span>
+            </td>
+            <td>
+              이론적으로 평균 대기시간, 평균 반환시간이 매우 우수하며, 
+              짧은 작업이 빠르게 처리되어 <span class="tag-good">일반적인 체감 성능이 좋음</span>.
+            </td>
+            <td>
+              긴 작업은 계속 밀려 <span class="tag-warn">기아 가능성</span>이 있으며,<br/>
+              실제 시스템에서는 burst 시간을 정확히 알기 어려움(추정 필요)
+            </td>
+          </tr>
+
+          <tr>
+            <td class="alg-col-name">Priority</td>
+            <td>
+              <span class="tag nonpreempt">Non-preemptive</span>
+              <span class="tag preempt" style="margin-top:3px">Preemptive 버전도 존재</span>
+            </td>
+            <td>
+              각 프로세스에 부여된 우선순위 값을 기준으로 CPU를 배분
+            </td>
+            <td>
+              <span class="tag">Priority 값</span>
+              <span class="tag">선점 여부 설정</span>
+            </td>
+            <td>
+              중요한 작업에 우선순위를 배분하여 <span class="tag-good">CPU 배분 제어력이 크며, </span>
+              시스템 정책에 따라 우선순위를 자유롭게 조정 가능
+            </td>
+            <td>
+              낮은 우선순위 프로세스는 장기간 실행되지 않는 <span class="tag-bad">심각한 기아 현상이 발생하며,</span>
+              기아 방지를 위해 에이징과 같은 보완 기법이 필요
+            </td>
+          </tr>
+
+          <tr>
+            <td class="alg-col-name">Round Robin</td>
+            <td>
+              <span class="tag preempt">Preemptive</span>
+            </td>
+            <td>
+              정해진 Time Quantum만큼 돌아가며 CPU를 나눠쓰는 방식
+            </td>
+            <td>
+              <span class="tag">Time Quantum 값</span>
+            </td>
+            <td>
+              Time Quantum 덕분에 <span class="tag-good">응답성</span>이 좋으며, 인터랙티브 시스템에 적합 
+              또한, 모든 프로세스가 CPU를 조금씩 가져가는 공정한 구조
+            </td>
+            <td>
+              Quantum이 너무 짧을 땐 <span class="tag-warn">Context Switching 비용이 증가</span>하고, 너무 길 땐 <span class="tag-warn">응답성이 저하</span>되므로
+              적절한 Quantum 선택이 핵심
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 하단: 직접 비교 -->
+    <h2 class="section-title">직접 비교하기</h2>
+    <p class="section-desc">
+      프로세스의 종류를 선택하고, 비교하고 싶은 알고리즘을 선택해 두 알고리즘을 직관적으로 비교할 수 있습니다.
+    </p>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="scenario-row">
+        <div class="scenario-row-left">
+          <strong> 예시 시나리오 선택 - - - - - </strong>
+        </div>
+        <div>
+          <select name="scenario" id="scenario-select">
+            <option value="A">Preset A – 모든 프로세스 동시에 도착</option>
+            <option value="B">Preset B – 도착 시간이 서로 다른 4개 프로세스</option>
+            <option value="C">Preset C – 우선순위가 다른 프로세스 세트</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="compare-grid">
+        <!-- 왼쪽 알고리즘 -->
+        <div class="compare-card">
+          <div class="compare-header">
+            <div>
+              <div class="compare-title">선택 알고리즘 - 1</div>
+            </div>
+            <div>
+              <div class="mini-label">알고리즘 선택</div>
+              <select name="alg1" id="alg1-select">
+                <option value="FCFS">FCFS</option>
+                <option value="SJF">SJF</option>
+                <option value="PRIORITY">Priority</option>
+                <option value="RR">Round Robin</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="mini-label">핵심 지표 (예: 선택된 시나리오 기준)</div>
+            <table class="metric-table">
+              <tr>
+                <th>평균 대기 시간 (WT)</th>
+                <td class="placeholder">어쩌구저쩌구</td>
+              </tr>
+              <tr>
+                <th>평균 반환 시간 (TAT)</th>
+                <td class="placeholder">어쩌구저쩌구2</td>
+              </tr>
+              <tr>
+                <th>평균 응답 시간 (RT)</th>
+                <td class="placeholder">어저쩌구쩌거구3</td>
+              </tr>
+              <tr>
+                <th>Throughput</th>
+                <td class="placeholder">시간당완료된프로세스수를표시</td>
+              </tr>
+              <tr>
+                <th>Starvation</th>
+                <td class="placeholder">어쩌구저쩌구4</td>
+              </tr>
+            </table>
+          </div>
+
+          <div>
+            <div class="mini-label">Gantt Chart</div>
+            <div class="gantt-box">
+              간트차를넣어주떼염
+            </div>
+          </div>
+        </div>
+
+        <!-- 오른쪽 알고리즘 -->
+        <div class="compare-card">
+          <div class="compare-header">
+            <div>
+              <div class="compare-title">선택 알고리즘 - 2</div>
+              <div class="compare-meta">오른쪽에 선택된 알고리즘의 결과</div>
+            </div>
+            <div>
+              <div class="mini-label">알고리즘 선택</div>
+              <select name="alg2" id="alg2-select">
+                <option value="FCFS">FCFS</option>
+                <option value="SJF">SJF</option>
+                <option value="PRIORITY">Priority</option>
+                <option value="RR">Round Robin</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="mini-label">핵심 지표 (예: 선택된 시나리오 기준)</div>
+            <table class="metric-table">
+              <tr>
+                <th>평균 대기 시간 (WT)</th>
+                <td class="placeholder">어쩌구저쩌구1</td>
+              </tr>
+              <tr>
+                <th>평균 반환 시간 (TAT)</th>
+                <td class="placeholder">어쩌구저저구쩌거구2</td>
+              </tr>
+              <tr>
+                <th>평균 응답 시간 (RT)</th>
+                <td class="placeholder">어쩌구저쩌구저저저3</td>
+              </tr>
+              <tr>
+                <th>Throughput</th>
+                <td class="placeholder">시간당완료된프로세스수를표시</td>
+              </tr>
+              <tr>
+                <th>Starvation</th>
+                <td class="placeholder">어쩌구저쩌저저쩌구</td>
+              </tr>
+            </table>
+          </div>
+
+          <div>
+            <div class="mini-label">Gantt Chart</div>
+            <div class="gantt-box">
+              간트차트를넣어주떼염
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comment-panel">
+        <strong>코멘트 영역</strong><br/>
+        두알고리즘의 차이의 핵심을 적어용
+      </div>
+    </div>
+  </main>
+</body>
+</html>

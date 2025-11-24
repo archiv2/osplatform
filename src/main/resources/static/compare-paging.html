@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compare | Page Replacement - OS Platform</title>
+  <style>
+    :root{
+      --bg:#000;--bg-2:#0a0a0a;--panel:#111;--panel-2:#131313;--line:#222;
+      --text:#fff;--muted:#b9c2cc;--accent:#00bfff;--btn:#0078ff;--btn-hover:#005ec9;
+      --good:#0ecb81;--warn:#ffcc00;--bad:#ff5c5c;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,system-ui,-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    /* header – Learn 페이지와 동일한 드롭다운 스타일 */
+    header{
+      position:sticky;top:0;z-index:20;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)
+    }
+    .logo{font-size:1.4em;font-weight:700;color:var(--accent)}
+    nav{display:flex;align-items:center;gap:150px}
+    .dropdown{position:relative;display:inline-block;padding:6px 0;cursor:pointer}
+    .dropdown::after{
+      content:" ⌄";display:inline-block;font-size:.8em;color:#ccc;
+      transition:transform .25s ease,color .25s ease
+    }
+    .dropdown:hover::after{transform:rotate(180deg);color:var(--accent)}
+    .dropdown-content{
+      display:none;position:absolute;background:#111;min-width:180px;
+      box-shadow:0 8px 16px rgba(0,0,0,.3);z-index:10
+    }
+    .dropdown-content a{
+      color:#fff;padding:10px 14px;text-decoration:none;display:block
+    }
+    .dropdown-content a:hover{background:#333}
+    .dropdown:hover .dropdown-content{display:block}
+    .dropdown > span > a{color:#fff;text-decoration:none}
+    .actions{display:flex;align-items:center;gap:20px}
+    #authArea{}
+    @media (max-width:880px){
+      header{padding:16px 20px;flex-wrap:wrap;gap:12px}
+      nav{gap:40px}
+    }
+
+    /* 본문 레이아웃 */
+    main{max-width:1120px;margin:0 auto;padding:26px 20px 60px}
+
+    h1{font-size:1.8rem;margin:4px 0 8px}
+    .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:20px}
+
+    .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .pill{
+      border-radius:999px;border:1px solid var(--line);
+      padding:4px 10px;font-size:.8rem;color:var(--muted);
+      display:inline-flex;align-items:center;gap:4px;
+    }
+    .pill span.dot{
+      width:7px;height:7px;border-radius:50%;background:var(--accent);
+    }
+
+    .panel{
+      background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px 20px 18px;
+      margin-bottom:18px;
+    }
+    .panel h2{
+      font-size:1.15rem;
+      margin:0 0 6px;
+    }
+    .panel .sub{
+      font-size:.9rem;color:var(--muted);margin:0 0 12px;
+    }
+
+    /* 상단 고정 비교표 */
+    .alg-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.9rem;
+    }
+    .alg-table thead{
+      background:rgba(255,255,255,.02);
+    }
+    .alg-table th,
+    .alg-table td{
+      border:1px solid var(--line);
+      padding:8px 10px;
+      vertical-align:top;
+    }
+    .alg-table th{
+      text-align:left;
+      font-size:.85rem;
+    }
+    .alg-col-name{
+      font-weight:600;
+      white-space:nowrap;
+    }
+    .alg-table td{
+      color:#dbe3ee;
+      font-size:.86rem;
+    }
+
+    .tag{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:.75rem;
+      margin:0 4px 2px 0;
+      color:#cfd9ea;
+    }
+    .tag-good{color:var(--good)}
+    .tag-warn{color:var(--warn)}
+    .tag-bad{color:var(--bad)}
+
+    /* 하단 직접 비교 영역 */
+    .section-title{
+      margin:26px 0 8px;
+      font-size:1.25rem;
+    }
+    .section-desc{
+      margin:0 0 14px;
+      font-size:.92rem;
+      color:var(--muted);
+    }
+
+    .scenario-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .scenario-row-left{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted)}
+    select{
+      background:#050506;
+      color:var(--text);
+      border-radius:10px;
+      border:1px solid var(--line);
+      padding:6px 10px;
+      font-size:.88rem;
+      min-width:130px;
+    }
+
+    .compare-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:16px;
+      margin-top:6px;
+    }
+
+    .compare-card{
+      background:linear-gradient(180deg,#0e0e0e 0%,#101018 100%);
+      border-radius:16px;
+      border:1px solid var(--line);
+      padding:14px 16px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .compare-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .compare-title{
+      font-size:.95rem;
+      font-weight:600;
+    }
+    .compare-meta{
+      font-size:.8rem;color:var(--muted);
+    }
+    .mini-label{font-size:.78rem;color:var(--muted);margin-bottom:3px}
+
+    .metric-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.83rem;
+      margin-top:2px;
+    }
+    .metric-table th,
+    .metric-table td{
+      border:1px solid var(--line);
+      padding:5px 6px;
+    }
+    .metric-table th{
+      text-align:left;
+      color:#dbe9f5;
+      width:40%;
+    }
+    .metric-table td.placeholder{
+      color:#6f7b88;
+      font-style:italic;
+    }
+
+    .gantt-box{
+      border-radius:10px;
+      border:1px dashed var(--line);
+      padding:10px;
+      font-size:.8rem;
+      color:#778495;
+      text-align:center;
+    }
+
+    .compare-note{
+      margin-top:12px;
+      font-size:.84rem;
+      color:var(--muted);
+      border-top:1px dashed var(--line);
+      padding-top:10px;
+    }
+
+    .comment-panel{
+      margin-top:14px;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px dashed var(--line);
+      font-size:.86rem;
+      color:var(--muted);
+    }
+    .comment-panel span{
+      color:var(--accent);
+    }
+
+    @media(max-width:900px){
+      main{padding:22px 16px 50px}
+      .compare-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">OS Platform</div>
+    <nav>
+      <!-- Learn -->
+      <div class="dropdown">
+        <span>Learn</span>
+        <div class="dropdown-content">
+          <a href="/learn-scheduling.html">스케줄링</a>
+          <a href="/learn-paging.html">페이지교체</a>
+          <a href="/learn-deadlock.html">데드록</a>
+        </div>
+      </div>
+
+      <!-- Simulator -->
+      <div class="dropdown">
+        <span>Simulator</span>
+        <div class="dropdown-content">
+          <a href="/sim-scheduling.html">CPU 스케줄링 시뮬레이터</a>
+          <a href="/sim-paging.html">페이지교체 시뮬레이터</a>
+          <a href="/sim-deadlock.html">데드록 시뮬레이터</a>
+        </div>
+      </div>
+
+      <!-- Compare -->
+      <div class="dropdown">
+        <span>
+          <a href="/compare-scheduling.html" style="color:#fff;text-decoration:none">
+            Compare
+          </a>
+        </span>
+      </div>
+
+      <!-- Graph -->
+      <div class="dropdown">
+        <span>
+          <a href="/graph-deadlock.html" style="color:#fff;text-decoration:none">
+            Graph
+          </a>
+        </span>
+      </div>
+    </nav>
+
+    <div class="actions">
+      <div id="authArea"></div>
+    </div>
+  </header>
+
+  <main>
+    <h1>Page Replacement Algorithm Compare</h1>
+    <p class="subtitle">
+      페이지 교체 알고리즘 4개를 한눈에 비교해서 보거나,<br />
+      같은 참조 문자열·프레임 수에서 두 알고리즘의 <b>페이지 폴트 패턴</b>을 비교할 수 있습니다.
+    </p>
+
+    <!-- 상단 고정 비교표 -->
+    <section class="panel">
+      <h2>알고리즘 한눈에 보기</h2>
+      <p class="sub">
+        입력 시나리오와 상관없이 변하지 않는 페이지 교체 알고리즘 4가지의 핵심 차이
+      </p>
+
+      <table class="alg-table">
+        <thead>
+          <tr>
+            <th style="width:110px">Algorithm</th>
+            <th style="width:110px">구현 난이도</th>
+            <th>교체 기준</th>
+            <th>요구 정보 / 하드웨어</th>
+            <th>장점</th>
+            <th>단점 / 특징</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="alg-col-name">FIFO</td>
+            <td>
+              <span class="tag">매우 쉬움</span>
+            </td>
+            <td>
+              먼저 메모리에 들어온 페이지를 먼저 교체
+            </td>
+            <td>
+              <span class="tag">Queue 자료구조만 필요</span>
+            </td>
+            <td>
+              구현이 단순하고 오버헤드가 적어, 다른 정책과 성능을 비교할 때
+              <span class="tag-good">기본 기준</span>으로 사용하기 좋음
+            </td>
+            <td>
+              초기에 자주 쓰이는 페이지가 먼저 쫓겨날 수 있고,
+              프레임 수를 늘려도 페이지 폴트가 증가하는
+              <span class="tag-bad">Belady의 모순</span>이 발생할 수 있음
+            </td>
+          </tr>
+
+          <tr>
+            <td class="alg-col-name">OPT</td>
+            <td>
+              <span class="tag tag-warn">이론적</span>
+            </td>
+            <td>
+              앞으로 <b>가장 오랫동안 사용되지 않을</b> 페이지를 교체
+            </td>
+            <td>
+              <span class="tag tag-bad">미래 참조 시퀀스 전체</span>
+            </td>
+            <td>
+              주어진 참조 문자열에서 <b>페이지 폴트 수가 최소</b>가 되어,
+              다른 알고리즘의 <span class="tag-good">이론적 상한선</span>이 됨
+            </td>
+            <td>
+              실제 시스템에서는 미래를 알 수 없기 때문에 <b>실시간 구현 불가</b>,<br/>
+              시뮬레이션·이론 비교용으로만 사용
+            </td>
+          </tr>
+
+          <tr>
+            <td class="alg-col-name">LRU</td>
+            <td>
+              <span class="tag">중간</span>
+            </td>
+            <td>
+              <b>가장 오래 참조되지 않은</b> 페이지를 교체 (시간적 지역성 가정)
+            </td>
+            <td>
+              <span class="tag">최근 참조 시각 / 순서</span>
+            </td>
+            <td>
+              실제 프로그램의 <b>지역성(Locality)</b>에 잘 맞고,
+              많은 경우 OPT에 비교적 <span class="tag-good">근접한 성능</span>을 보임
+            </td>
+            <td>
+              정확한 LRU 구현은 리스트/카운터 갱신 비용이 커서,
+              보통 <b>참조 비트·스택 구조</b> 등으로 근사 구현함
+            </td>
+          </tr>
+
+          <tr>
+            <td class="alg-col-name">Clock (NUR)</td>
+            <td>
+              <span class="tag">쉬움 ~ 중간</span>
+            </td>
+            <td>
+              시계 바늘이 가면서 <b>참조 비트가 0인 페이지</b>부터 교체 (필요 시 Dirty 비트 고려)
+            </td>
+            <td>
+              <span class="tag">참조 비트(R)</span>
+              <span class="tag">변형 비트(D, 선택)</span>
+            </td>
+            <td>
+              간단한 비트 정보만으로 LRU를 <span class="tag-good">저렴하게 근사</span>할 수 있어
+              실제 OS에서 널리 사용되는 계열
+            </td>
+            <td>
+              스캔 주기·리스트 크기에 따라 성능이 달라지며,
+              정확 LRU만큼 정밀하지는 않음. 구현에 따라 다양한 변종이 존재
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 하단: 직접 비교 -->
+    <h2 class="section-title">직접 비교하기</h2>
+    <p class="section-desc">
+      참조 문자열(Reference String)과 프레임 수를 선택하고,
+      비교하고 싶은 알고리즘을 선택해 <b>페이지 폴트 수·Hit Rate</b>를 직관적으로 비교할 수 있습니다.
+    </p>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="scenario-row">
+        <div class="scenario-row-left">
+          <strong> 예시 시나리오 선택 - - - - - </strong>
+        </div>
+        <div>
+          <select name="scenario" id="scenario-select">
+            <option value="A">Preset A – 좋은 지역성(순차적인 배열 접근)</option>
+            <option value="B">Preset B – 랜덤 접근이 섞인 패턴</option>
+            <option value="C">Preset C – Working Set &gt; 프레임 수</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="scenario-row">
+        <div class="scenario-row-left">
+          <span>프레임 수 선택</span>
+        </div>
+        <div>
+          <select name="frames" id="frame-select">
+            <option value="3">3 Frames</option>
+            <option value="4">4 Frames</option>
+            <option value="5">5 Frames</option>
+            <option value="8">8 Frames</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="compare-grid">
+        <!-- 왼쪽 알고리즘 -->
+        <div class="compare-card">
+          <div class="compare-header">
+            <div>
+              <div class="compare-title">선택 알고리즘 - 1</div>
+            </div>
+            <div>
+              <div class="mini-label">알고리즘 선택</div>
+              <select name="alg1" id="alg1-select">
+                <option value="FIFO">FIFO</option>
+                <option value="OPT">OPT</option>
+                <option value="LRU">LRU</option>
+                <option value="CLOCK">Clock (NUR)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="mini-label">핵심 지표 (선택된 시나리오 기준)</div>
+            <table class="metric-table">
+              <tr>
+                <th>총 Page Fault 수</th>
+                <td class="placeholder">어쩌구저쩌구1</td>
+              </tr>
+              <tr>
+                <th>Page Fault Rate</th>
+                <td class="placeholder">어쩌구저쩌구2</td>
+              </tr>
+              <tr>
+                <th>Hit Rate</th>
+                <td class="placeholder">오쩌구저쩌구4</td>
+              </tr>
+              <tr>
+                <th>Average Memory Access Time</th>
+                <td class="placeholder">오저쭈거저쩌구5</td>
+              </tr>
+              <tr>
+                <th>Dirty Page Write 횟수</th>
+                <td class="placeholder">라라라라라리리랄</td>
+              </tr>
+            </table>
+          </div>
+
+          <div>
+            <div class="mini-label">Frame Timeline</div>
+            <div class="gantt-box">
+              저쩌구저쩌구 타임라인
+            </div>
+          </div>
+        </div>
+
+        <!-- 오른쪽 알고리즘 -->
+        <div class="compare-card">
+          <div class="compare-header">
+            <div>
+              <div class="compare-title">선택 알고리즘 - 2</div>
+              <div class="compare-meta">오른쪽에 선택된 알고리즘의 결과</div>
+            </div>
+            <div>
+              <div class="mini-label">알고리즘 선택</div>
+              <select name="alg2" id="alg2-select">
+                <option value="FIFO">FIFO</option>
+                <option value="OPT">OPT</option>
+                <option value="LRU">LRU</option>
+                <option value="CLOCK">Clock (NUR)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="mini-label">핵심 지표 (선택된 시나리오 기준)</div>
+            <table class="metric-table">
+              <tr>
+                <th>총 Page Fault 수</th>
+                <td class="placeholder">오쭈거저ㅓ쭈거주1</td>
+              </tr>
+              <tr>
+                <th>Page Fault Rate</th>
+                <td class="placeholder">아쩌구저쩌구자저2</td>
+              </tr>
+              <tr>
+                <th>Hit Rate</th>
+                <td class="placeholder">저쩌구어저쩌구3</td>
+              </tr>
+              <tr>
+                <th>Average Memory Access Time</th>
+                <td class="placeholder">우짜구저쩌가주4</td>
+              </tr>
+              <tr>
+                <th>Dirty Page Write 횟수</th>
+                <td class="placeholder">자짜구저자짜구5</td>
+              </tr>
+            </table>
+          </div>
+
+          <div>
+            <div class="mini-label">Frame Timeline</div>
+            <div class="gantt-box">
+              타임라인넣기
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comment-panel">
+        <strong>코멘트 영역</strong><br/>
+          두알고리즘비교설명 어저쭈구저쩌구
+      </div>
+    </div>
+  </main>
+</body>
+</html>
