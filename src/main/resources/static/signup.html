@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - OS Platform</title>
+    <style>
+        :root{
+          --bg:#000;--bg-2:#0a0a0a;--panel:#111;--panel-2:#131313;--line:#222;
+          --text:#fff;--muted:#b9c2cc;--accent:#00bfff;--btn:#0078ff;--btn-hover:#005ec9;
+          --good:#0ecb81;--bad:#ff5c5c;
+        }
+        *{box-sizing:border-box}
+        body{
+          margin:0;
+          font-family:Arial,system-ui,-apple-system,sans-serif;
+          background:var(--bg);
+          color:var(--text);
+        }
+
+        /* header 공통 */
+        header{
+          position:sticky;top:0;z-index:20;
+          display:flex;justify-content:space-between;align-items:center;
+          padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)
+        }
+        .logo{font-size:1.4em;font-weight:700;color:var(--accent);text-decoration:none}
+        nav{display:flex;align-items:center;gap:150px}
+        .dropdown{position:relative;display:inline-block;padding:6px 0;cursor:pointer}
+        .dropdown::after{
+          content:" ⌄";display:inline-block;font-size:.8em;color:#ccc;
+          transition:transform .25s ease,color .25s ease
+        }
+        .dropdown:hover::after{transform:rotate(180deg);color:var(--accent)}
+        .dropdown-content{
+          display:none;position:absolute;background:#111;min-width:180px;
+          box-shadow:0 8px 16px rgba(0,0,0,.3);z-index:10
+        }
+        .dropdown-content a{
+          color:#fff;padding:10px 14px;text-decoration:none;display:block
+        }
+        .dropdown-content a:hover{background:#333}
+        .dropdown:hover .dropdown-content{display:block}
+        .dropdown > span > a{color:#fff;text-decoration:none}
+        .actions{display:flex;align-items:center;gap:20px}
+        .login-btn{
+          background:var(--btn);color:#fff;border:none;padding:8px 16px;
+          border-radius:20px;cursor:pointer;font-weight:700
+        }
+        .login-btn:hover{background:var(--btn-hover)}
+        .profile-btn{background:transparent;border:none;padding:0;cursor:pointer;line-height:0;border-radius:999px;outline:none}
+        .profile-btn svg{width:36px;height:36px;background:#fff;border-radius:999px;padding:4px}
+        .profile-btn:hover svg{box-shadow:0 0 0 3px rgba(0,191,255,.25)}
+
+        @media (max-width:880px){
+          header{padding:16px 20px;flex-wrap:wrap;gap:12px}
+          nav{gap:40px}
+        }
+
+        /* 메인 레이아웃 */
+        .signup-root{
+          min-height:calc(100vh - 80px);
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          padding:40px 16px 60px;
+          background:radial-gradient(circle at 70% 0%, #003366, #000);
+        }
+
+        .signup-card{
+          width:100%;
+          max-width:440px;
+          background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+          border:1px solid var(--line);
+          border-radius:18px;
+          padding:26px 26px 24px;
+          box-shadow:0 18px 45px rgba(0,0,0,.55);
+        }
+
+        .signup-title{
+          font-size:1.5rem;
+          font-weight:600;
+          text-align:center;
+          margin:0 0 4px;
+        }
+        .signup-sub{
+          font-size:.9rem;
+          color:var(--muted);
+          text-align:center;
+          margin:0 0 20px;
+        }
+
+        /* 캐릭터 */
+        .signup-avatar{
+          width:120px;
+          height:120px;
+          margin:0 auto 12px;
+          position:relative;
+        }
+        .signup-avatar .face{
+          position:absolute;
+          inset:0;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          transition:opacity .3s ease, transform .3s ease;
+        }
+        .signup-avatar .face svg{
+          width:100%;
+          height:100%;
+        }
+        .face-cover{opacity:0;transform:translateY(6px);}
+        .signup-avatar.covering .face-open{opacity:0;transform:translateY(-6px);}
+        .signup-avatar.covering .face-cover{opacity:1;transform:translateY(0);}
+
+        /* 폼 */
+        .signup-form{
+          margin-top:8px;
+          display:flex;
+          flex-direction:column;
+          gap:14px;
+        }
+        .field{
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+          font-size:.9rem;
+        }
+        label{
+          color:#dde5f0;
+          font-size:.88rem;
+        }
+        .inline-row{
+          display:flex;
+          gap:8px;
+          align-items:center;
+        }
+        input[type="text"],
+        input[type="password"]{
+          flex:1;
+          background:#050506;
+          color:var(--text);
+          border-radius:10px;
+          border:1px solid var(--line);
+          padding:8px 10px;
+          font-size:.9rem;
+        }
+        input::placeholder{color:#6f7b88;}
+
+        .btn-secondary{
+          white-space:nowrap;
+          border-radius:999px;
+          border:1px solid var(--line);
+          padding:8px 12px;
+          font-size:.82rem;
+          cursor:pointer;
+          background:#141820;
+          color:#dbe7f5;
+        }
+        .btn-secondary:hover{
+          background:#1a2230;
+        }
+
+        .msg{
+          font-size:.78rem;
+          margin-top:2px;
+          min-height:16px;
+        }
+        .msg.ok{color:var(--good);}
+        .msg.error{color:var(--bad);}
+
+        .signup-btn{
+          margin-top:6px;
+          border:none;
+          border-radius:999px;
+          padding:10px 14px;
+          font-size:.95rem;
+          font-weight:600;
+          width:100%;
+          cursor:pointer;
+          background:var(--btn);
+          color:#fff;
+        }
+        .signup-btn:hover{background:var(--btn-hover);}
+
+        .bottom-row{
+          margin-top:12px;
+          font-size:.82rem;
+          text-align:center;
+          color:var(--muted);
+        }
+        .bottom-row a{
+          color:var(--accent);
+          text-decoration:none;
+          font-weight:500;
+        }
+        .bottom-row a:hover{text-decoration:underline;}
+    </style>
+</head>
+<body>
+<header>
+    <a href="/index.html" class="logo">OS Platform</a>
+
+    <nav>
+        <!-- Learn -->
+        <div class="dropdown">
+            <span>Learn</span>
+            <div class="dropdown-content">
+                <a href="/learn-scheduling.html">CPU Scheduling</a>
+                <a href="/learn-paging.html">Page Replacement</a>
+                <a href="/learn-deadlock.html">Deadlock</a>
+            </div>
+        </div>
+
+        <!-- Simulator -->
+        <div class="dropdown">
+            <span>Simulator</span>
+            <div class="dropdown-content">
+                <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
+                <a href="/sim-paging.html">Page Replacement Simulator</a>
+                <a href="/sim-deadlock.html">Deadlock Simulator</a>
+            </div>
+        </div>
+
+        <!-- Compare -->
+        <div class="dropdown">
+            <span>Compare</span>
+            <div class="dropdown-content">
+                <a href="/compare-scheduling.html">Scheduling Algorithms Compare</a>
+                <a href="/compare-paging.html">Paging Algorithms Compare</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="actions">
+        <div id="authArea"></div>
+    </div>
+</header>
+
+<main class="signup-root">
+    <section class="signup-card">
+        <div class="signup-avatar" id="signup-avatar">
+                <!-- 눈 뜨고 있는 로봇 -->
+            <div class="face face-open">
+                <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+
+                    <!-- 로봇 머리 (살짝 내림: y=32) -->
+                    <rect x="28" y="32" width="64" height="52" rx="8" ry="8"
+                          fill="#f4f1ea" stroke="#222" stroke-width="2"/>
+
+                    <!-- 귀 (y=44로 조정) -->
+                    <rect x="20" y="44" width="10" height="28" rx="3" fill="#4d6a80"/>
+                    <rect x="90" y="44" width="10" height="28" rx="3" fill="#4d6a80"/>
+
+                    <!-- 안테나 (전체 +10 아래로 이동) -->
+                    <line x1="60" y1="24" x2="60" y2="32" stroke="#222" stroke-width="3"/>
+                    <circle cx="60" cy="20" r="4" fill="#f4a623" stroke="#222" stroke-width="2"/>
+
+                    <!-- 눈 -->
+                    <circle cx="44" cy="54" r="5" fill="#222"/>
+                    <circle cx="76" cy="54" r="5" fill="#222"/>
+
+                    <!-- 입 (ㅇ) -->
+                    <circle cx="60" cy="70" r="6" fill="none" stroke="#c95f7c" stroke-width="2.4"/>
+
+                    <!-- 몸통 -->
+                    <rect x="44" y="86" width="32" height="10" rx="3" fill="#4d6a80"/>
+                </svg>
+            </div>
+
+
+            <!-- 눈 가리는 로봇 -->
+            <div class="face face-cover">
+                <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 로봇 머리 (네모) -->
+                    <rect x="28" y="32" width="64" height="52" rx="8" ry="8"
+                          fill="#f4f1ea" stroke="#222" stroke-width="2"/>
+
+                    <!-- 귀 -->
+                    <rect x="20" y="44" width="10" height="28" rx="3" fill="#4d6a80"/>
+                    <rect x="90" y="44" width="10" height="28" rx="3" fill="#4d6a80"/>
+
+                    <!-- 안테나 -->
+                    <line x1="60" y1="24" x2="60" y2="32" stroke="#222" stroke-width="3"/>
+                    <circle cx="60" cy="20" r="4" fill="#f4a623" stroke="#222" stroke-width="2"/>
+
+                    <!-- 눈 (살짝 보이는 점) -->
+                    <circle cx="46" cy="58" r="2" fill="#222"/>
+                    <circle cx="74" cy="58" r="2" fill="#222"/>
+
+                    <!-- 입 (ㅇ) -->
+                    <circle cx="60" cy="74" r="6" fill="none" stroke="#c95f7c" stroke-width="2.4"/>
+
+                    <!-- 사람팔처럼 휘어진 로봇 팔 -->
+                    <!-- 왼팔 -->
+                    <path d="M22 78 Q34 54 50 54"
+                          stroke="#4d6a80" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    <!-- 오른팔 -->
+                    <path d="M98 78 Q86 54 70 54"
+                          stroke="#4d6a80" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+                    <!-- 몸통 -->
+                    <rect x="44" y="86" width="32" height="10" rx="3" fill="#4d6a80"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="signup-title">Create Account</h1>
+
+        <form id="signup-form" class="signup-form">
+            <!-- 아이디 -->
+            <div class="field">
+                <label for="userId">아이디</label>
+                <div class="inline-row">
+                    <input type="text" id="userId" autocomplete="off" placeholder="아이디를 입력하세요" required />
+                    <button type="button" class="btn-secondary" id="check-id-btn">아이디 중복확인</button>
+                </div>
+                <div class="msg" id="id-msg"></div>
+            </div>
+
+            <!-- 비밀번호 -->
+            <div class="field">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="비밀번호를 입력하세요" required />
+            </div>
+
+            <!-- 비밀번호 확인 -->
+            <div class="field">
+                <label for="passwordConfirm">비밀번호 확인</label>
+                <input type="password" id="passwordConfirm" placeholder="비밀번호를 다시 입력하세요" required />
+                <div class="msg" id="pw-msg"></div>
+            </div>
+
+            <button type="submit" class="signup-btn" id="signup-btn">회원가입 하기</button>
+        </form>
+
+        <div class="bottom-row">
+            이미 계정이 있다면? <a href="login.html">로그인 하러가기</a>
+        </div>
+    </section>
+</main>
+
+<script>
+    // --- 로그인 / 프로필 버튼 ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('authArea');
+      if (container) {
+        const user = sessionStorage.getItem('user');
+        container.innerHTML = (user && user.trim() !== '')
+          ? `
+          <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+            <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+            </svg>
+          </button>`
+          : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+      }
+
+      setupSignupPage();
+    });
+
+    function setupSignupPage() {
+      const avatar = document.getElementById('signup-avatar');
+      const userIdInput = document.getElementById('userId');
+      const checkIdBtn = document.getElementById('check-id-btn');
+      const idMsg = document.getElementById('id-msg');
+
+      const pwInput = document.getElementById('password');
+      const pwConfirmInput = document.getElementById('passwordConfirm');
+      const pwMsg = document.getElementById('pw-msg');
+
+      const form = document.getElementById('signup-form');
+
+      let idAvailable = false;    // 아이디 중복 여부
+
+      // --- 비밀번호 입력 시 캐릭터 눈 가리기 ---
+      function setCoverEyes(on) {
+        if (!avatar) return;
+        if (on) avatar.classList.add('covering');
+        else avatar.classList.remove('covering');
+      }
+
+      [pwInput, pwConfirmInput].forEach(el => {
+        el.addEventListener('focus', () => setCoverEyes(true));
+        el.addEventListener('blur', () => setCoverEyes(false));
+      });
+
+      // --- 비밀번호 일치 체크 ---
+      function validatePasswordMatch() {
+        const pw = pwInput.value;
+        const pw2 = pwConfirmInput.value;
+
+        pwMsg.textContent = '';
+        pwMsg.className = 'msg';
+
+        if (!pw && !pw2) return false;
+
+        if (pw !== pw2) {
+          pwMsg.textContent = '비밀번호가 다릅니다.';
+          pwMsg.classList.add('error');
+          return false;
+        } else {
+          pwMsg.textContent = '비밀번호가 일치합니다.';
+          pwMsg.classList.add('ok');
+          return true;
+        }
+      }
+
+      pwInput.addEventListener('input', validatePasswordMatch);
+      pwConfirmInput.addEventListener('input', validatePasswordMatch);
+
+      // --- 아이디 입력 중에는 다시 체크 필요하도록 초기화 ---
+      userIdInput.addEventListener('input', () => {
+        idAvailable = false;
+        idMsg.textContent = '';
+        idMsg.className = 'msg';
+      });
+
+      // --- 아이디 중복확인 버튼 (현재는 프론트 더미 로직, 이후 백엔드 연동 가능) ---
+      checkIdBtn.addEventListener('click', () => {
+        const id = userIdInput.value.trim();
+
+        idMsg.textContent = '';
+        idMsg.className = 'msg';
+
+        if (!id) {
+          idMsg.textContent = '아이디를 먼저 입력해주세요.';
+          idMsg.classList.add('error');
+          idAvailable = false;
+          return;
+        }
+
+        // TODO: 실제 서버 연동 시 여기서 fetch로 /api/auth/check-id 같은 엔드포인트 호출하면 됨.
+        // 지금은 데모용으로 몇 개의 아이디만 "이미 존재"하는 것으로 처리.
+        const taken = ['admin', 'test', 'user', 'osplatform'];
+
+        if (taken.includes(id.toLowerCase())) {
+          idMsg.textContent = '이미 있는 아이디입니다.';
+          idMsg.classList.add('error');
+          idAvailable = false;
+        } else {
+          idMsg.textContent = '사용 가능한 아이디입니다.';
+          idMsg.classList.add('ok');
+          idAvailable = true;
+        }
+      });
+
+      // --- 폼 제출 (회원가입 하기 버튼) ---
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const id = userIdInput.value.trim();
+        const pw = pwInput.value;
+        const pw2 = pwConfirmInput.value;
+
+        const pwOk = validatePasswordMatch();
+
+        // 빨간 글씨 뜬 상태(아이디 중복, 비번 불일치, 필수값 누락)면 경고
+        if (!id || !pw || !pw2 || !pwOk || !idAvailable) {
+          alert('입력 내용을 다시 확인해주세요.');
+          return;
+        }
+
+        // 여기서 실제로는 비밀번호는 백엔드에서 암호화해서 저장해야 함.
+        // 프론트에서는 평문을 보내고, 서버에서 BCrypt 등으로 해시하는 것이 일반적.
+
+        // 데모용 처리: 그냥 완료 알림 후 로그인 페이지로 이동
+        alert('회원가입이 완료되었습니다. 이제 로그인 페이지로 이동합니다.');
+        window.location.href = 'login.html';
+      });
+    }
+</script>
+</body>
+</html>
