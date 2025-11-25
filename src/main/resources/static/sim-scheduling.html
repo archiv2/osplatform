@@ -18,8 +18,8 @@
       color:var(--text);
     }
 
-        /* header */
-        header{
+    /* header */
+    header{
       position:sticky;top:0;z-index:20;
       display:flex;justify-content:space-between;align-items:center;
       padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)
@@ -58,7 +58,6 @@
       display:block;
     }
     .dropdown-content a:hover{background:#333}
-    /* 이 줄이 있어야 '호버만으로' 메뉴가 펼쳐져요 */
     .dropdown:hover .dropdown-content{display:block}
     .dropdown > span > a{
       color:#fff;
@@ -86,7 +85,6 @@
       nav{gap:40px}
     }
 
-
     .wrap{
       max-width:1150px;
       margin:0 auto;
@@ -109,18 +107,6 @@
       color:#d7e2ea;
       line-height:1.7;
       font-size:.96rem;
-    }
-
-    h2.md{
-      font-size:1.4rem;
-      margin:30px 0 12px;
-    }
-    h2.md::before{
-      content:"\25C6";
-      display:inline-block;
-      margin-right:8px;
-      color:#34b4ff;
-      vertical-align:middle;
     }
 
     .sim-layout{
@@ -282,27 +268,14 @@
       opacity:.6;
     }
 
-    .chart-shell{
+    /* 차트 박스 바깥 테두리 */
+    .chart-area{
       margin-top:4px;
-      margin-bottom:14px;
-      padding:16px 14px 20px;
+      margin-bottom:10px;
+      padding:10px 12px 12px;
       border-radius:14px;
       border:1px dashed var(--line);
       background:#05070c;
-    }
-    .chart-placeholder{
-      height:120px;
-      border-radius:10px;
-      border:1px solid #1d2633;
-      background:radial-gradient(140% 160% at 80% 0%,#102744 0%,#05070c 60%);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:.85rem;
-      color:#93a4ba;
-      text-align:center;
-      padding:0 12px;
-      white-space:pre-line;
     }
 
     .metrics-grid{
@@ -354,10 +327,66 @@
       text-align:center;
     }
 
-    .run-info{
-      margin-top:8px;
-      font-size:.82rem;
+    /* ===== Gantt Chart 스타일 ===== */
+    .gantt-chart{
+      width:100%;
+      background:radial-gradient(circle at 10% 0%, #001a33, #020308 65%);
+      border-radius:12px;
+      border:1px solid var(--line);
+      padding:10px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:.8rem;
+      color:#dbe9ff;
+    }
+    .gantt-chart-empty{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100%;
+      text-align:center;
+      color:#7c8aa0;
+    }
+    .gantt-row{
+      display:flex;
+      align-items:stretch;
+      width:100%;
+      overflow:hidden;
+      border-radius:10px;
+      background:#020308;
+    }
+    .gantt-block{
+      position:relative;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:4px 0;
+      white-space:nowrap;
+    }
+    .gantt-block:not(:last-child){
+      box-shadow:inset -1px 0 0 rgba(0,0,0,.45);
+    }
+    .gantt-pid{
+      font-weight:600;
+    }
+
+    .gantt-time-row{
+      display:flex;
+      width:100%;
+      margin-top:6px;
+      font-size:.75rem;
       color:#9bb3c7;
+    }
+    .gantt-time-label{
+      text-align:center;
+    }
+
+    .gantt-caption{
+      margin-top:6px;
+      font-size:.78rem;
+      color:#9bb3c7;
+      line-height:1.5;
     }
   </style>
 </head>
@@ -506,10 +535,13 @@
       위 설정으로 실행한 결과가 이 영역에 표시됩니다. Gantt 차트, 핵심 지표, 프로세스별 시간 정보를 한 번에 확인하세요.
     </div>
 
-    <div class="chart-shell">
-      <div class="chart-placeholder" id="chart-placeholder">
-        아직 시뮬레이션이 실행되지 않았습니다.
+    <div class="chart-area">
+      <div id="gantt-chart" class="gantt-chart">
+        시뮬레이션을 실행해 주세요.<br>
         실행 후 이 영역에 Gantt Chart / 타임라인 시각화가 표시됩니다.
+      </div>
+      <div id="gantt-caption" class="gantt-caption">
+        프로세스 실행 순서와 각 구간의 시간 범위를 한눈에 보여주는 Gantt 차트입니다.
       </div>
     </div>
 
@@ -559,35 +591,100 @@
       </tr>
       </tbody>
     </table>
-
-    <div class="run-info" id="run-info">
-      아직 실행 기록이 없습니다.
-    </div>
   </section>
 </div>
 
 <script>
   let lastSchedulingResult = null;
-  // --- 로그인 / 프로필 버튼 ---
-  document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('authArea');
-    if (container) {
-      const user = sessionStorage.getItem('user');
-      container.innerHTML = (user && user.trim() !== '')
-        ? `
-        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
-          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-          </svg>
-        </button>`
-        : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
-    }
-  });
-
-  // --- 프로세스 추가/초기화 로직 ---
   let procCount = 0;
 
+  // --- Gantt Chart 렌더링 함수 (막대 안에는 PID만, 아래 줄에 시간) ---
+  function renderGanttChart(gantt) {
+    const container = document.getElementById('gantt-chart');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!gantt || gantt.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'gantt-chart-empty';
+      empty.innerHTML = '시뮬레이션 결과가 없습니다.<br>프로세스를 추가하고 실행을 눌러주세요.';
+      container.appendChild(empty);
+      return;
+    }
+
+    // 전체 시간 = end의 최댓값
+    const totalTime = gantt.reduce((max, seg) => Math.max(max, seg.end || 0), 0);
+    if (!totalTime) {
+      container.textContent = '유효한 Gantt 데이터가 없습니다.';
+      return;
+    }
+
+    const colorMap = {};
+    const palette = ['#4fd1c5','#63b3ed','#f6ad55','#fc8181','#9f7aea','#f687b3','#48bb78','#fbd38d'];
+    const getColor = (pid) => {
+      if (!colorMap[pid]) {
+        colorMap[pid] = palette[Object.keys(colorMap).length % palette.length];
+      }
+      return colorMap[pid];
+    };
+
+    const row = document.createElement('div');
+    row.className = 'gantt-row';
+
+    const timeRow = document.createElement('div');
+    timeRow.className = 'gantt-time-row';
+
+    gantt.forEach(seg => {
+      const len = (seg.end ?? 0) - (seg.start ?? 0);
+      if (len <= 0) return;
+
+      const widthPercent = (len / totalTime) * 100;
+
+      // 막대 (PID만 표시)
+      const block = document.createElement('div');
+      block.className = 'gantt-block';
+      block.style.flexBasis = widthPercent + '%';
+      block.style.backgroundColor = getColor(seg.pid);
+
+      const pidSpan = document.createElement('span');
+      pidSpan.className = 'gantt-pid';
+      pidSpan.textContent = seg.pid;
+      block.appendChild(pidSpan);
+      row.appendChild(block);
+
+      // 아래 시간 라벨
+      const timeLabel = document.createElement('div');
+      timeLabel.className = 'gantt-time-label';
+      timeLabel.style.flexBasis = widthPercent + '%';
+      timeLabel.textContent = `${seg.start}~${seg.end}`;
+      timeRow.appendChild(timeLabel);
+    });
+
+    container.appendChild(row);
+    container.appendChild(timeRow);
+  }
+
+  // --- Gantt 캡션 업데이트 ---
+  function updateGanttCaption(gantt, algo, unitText) {
+    const caption = document.getElementById('gantt-caption');
+    if (!caption) return;
+
+    if (!gantt || !gantt.length) {
+      caption.textContent =
+        '프로세스 실행 순서와 각 구간의 시간 범위를 한눈에 보여주는 Gantt 차트입니다.';
+      return;
+    }
+
+    const order = gantt.map(s => s.pid).join(' → ');
+    const totalTime = gantt.reduce((max, seg) => Math.max(max, seg.end || 0), 0);
+
+    caption.textContent =
+      `알고리즘 ${algo} 기준 실행 순서: ${order} (총 실행 시간: ${totalTime}${unitText}). ` +
+      `막대 길이는 각 프로세스가 CPU를 점유한 시간 비율을 의미합니다.`;
+  }
+
+  // --- 프로세스 추가/초기화 로직 ---
   function createProcRow(pidLabel, arrival = 0, burst = 1) {
     const tbody = document.getElementById('proc-body');
 
@@ -647,11 +744,20 @@
     document.getElementById('rt-unit').textContent = '';
     document.getElementById('result-body').innerHTML =
       '<tr><td colspan="8" class="result-placeholder">시뮬레이션을 실행하면 여기에서 각 프로세스의 시간 정보를 확인할 수 있습니다.</td></tr>';
-    document.getElementById('run-info').textContent = '아직 실행 기록이 없습니다.';
 
-    const chartBox = document.getElementById('chart-placeholder');
-    chartBox.textContent =
-'아직 시뮬레이션이 실행되지 않았습니다.\n실행 후 이 영역에 Gantt Chart / 타임라인 시각화가 표시됩니다.';
+    const chartBox = document.getElementById('gantt-chart');
+    if (chartBox) {
+      chartBox.innerHTML =
+        '시뮬레이션을 실행해 주세요.<br>' +
+        '실행 후 이 영역에 Gantt Chart / 타임라인 시각화가 표시됩니다.';
+    }
+    const caption = document.getElementById('gantt-caption');
+    if (caption) {
+      caption.textContent =
+        '프로세스 실행 순서와 각 구간의 시간 범위를 한눈에 보여주는 Gantt 차트입니다.';
+    }
+
+    lastSchedulingResult = null;
   }
 
   // --- 백엔드 연동 시뮬레이션 실행 ---
@@ -704,7 +810,7 @@
 
       const data = await res.json();
       const gantt = data.gantt || [];
-      const metrics = data.metrics || {};
+      const metrics = data.metrics || [];
 
       // 3) Gantt 결과로 각 프로세스의 start/finish/WT/TAT/RT 계산
       const firstStart = {};
@@ -741,16 +847,23 @@
       const totalTime = gantt.reduce((max, s) => Math.max(max, s.end || 0), 0);
 
       // 평균값: 백엔드가 준 metrics 우선 사용
-      const avgWT = metrics.avgWaiting ?? (
-        detailedProcs.reduce((sum, p) => sum + p.wait, 0) / detailedProcs.length
-      );
-      const avgTAT = metrics.avgTurnaround ?? (
-        detailedProcs.reduce((sum, p) => sum + p.turnaround, 0) / detailedProcs.length
-      );
-      const avgRT = metrics.avgResponse ?? (
-        detailedProcs.reduce((sum, p) => sum + p.response, 0) / detailedProcs.length
-      );
+      const avgWT = (metrics.avgWaiting !== undefined)
+        ? metrics.avgWaiting
+        : detailedProcs.reduce((sum, p) => sum + p.wait, 0) / detailedProcs.length;
+
+      const avgTAT = (metrics.avgTurnaround !== undefined)
+        ? metrics.avgTurnaround
+        : detailedProcs.reduce((sum, p) => sum + p.turnaround, 0) / detailedProcs.length;
+
+      const avgRT = (metrics.avgResponse !== undefined)
+        ? metrics.avgResponse
+        : detailedProcs.reduce((sum, p) => sum + p.response, 0) / detailedProcs.length;
+
       const throughput = (detailedProcs.length / (totalTime || 1)).toFixed(3);
+
+      // ✅ Gantt 차트 + 캡션 업데이트
+      renderGanttChart(gantt);
+      updateGanttCaption(gantt, algo, unitText);
 
       // 4) 상단 요약 영역 업데이트
       document.getElementById('wt-unit').textContent = unitText;
@@ -779,44 +892,22 @@
         resultBody.appendChild(tr);
       });
 
-      // 6) Gantt 요약 텍스트
-      const order = gantt.map(g => g.pid).join(' → ');
-      const chartBox = document.getElementById('chart-placeholder');
-      chartBox.textContent =
-`[백엔드 결과 기반 Gantt 정보]
-실행 순서: ${order}
-총 실행 시간: ${totalTime}${unitText}
-(추후 이 영역에 실제 Gantt 차트를 그려서 사용할 수 있습니다.)`;
-
-      // 7) 마지막 실행 정보
-      const now = new Date();
-      const info = [
-        '마지막 실행: ',
-        now.toLocaleDateString(), ' ',
-        now.toLocaleTimeString(),
-        ' | 선택 알고리즘: ', algo,
-        (algo === 'RR' ? ` (Q=${quantum})` : ''),
-        ' | 프로세스 수: ', detailedProcs.length,
-        ' | 총 실행 시간: ', totalTime, unitText
-      ].join('');
-      document.getElementById('run-info').textContent = info;
-
+      // 저장용 데이터
       lastSchedulingResult = {
-      type: 'scheduling',
-      title: `CPU Scheduling (${algo}${algo === 'RR' ? `, Q=${quantum}` : ''})`,
-      algo,
-      quantum,
-      timeUnit,
-      totalTime,
-      metrics: {
-        avgWT: Number(avgWT),
-        avgTAT: Number(avgTAT),
-        avgRT: Number(avgRT),
-        throughput: Number(throughput)
-      },
-      processes: detailedProcs
-    };
-
+        type: 'scheduling',
+        title: `CPU Scheduling (${algo}${algo === 'RR' ? `, Q=${quantum}` : ''})`,
+        algo,
+        quantum,
+        timeUnit,
+        totalTime,
+        metrics: {
+          avgWT: Number(avgWT),
+          avgTAT: Number(avgTAT),
+          avgRT: Number(avgRT),
+          throughput: Number(throughput)
+        },
+        processes: detailedProcs
+      };
 
     } catch (err) {
       console.error(err);
@@ -846,49 +937,74 @@
     }
   })();
 
+  // --- 결과 저장 ---
   async function saveSchedulingRecord() {
-  if (!lastSchedulingResult) {
-    alert('먼저 시뮬레이션을 실행해주세요.');
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/records', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(lastSchedulingResult)
-    });
-
-    if (!res.ok) {
-      throw new Error('status ' + res.status);
+    if (!lastSchedulingResult) {
+      alert('먼저 시뮬레이션을 실행해주세요.');
+      return;
     }
 
-    alert('저장하였습니다. 마이페이지에서 확인하세요.');
-  } catch (e) {
-    console.error(e);
-    alert('저장 중 오류가 발생했습니다.');
+    // 혹시 모를 비로그인 접근 방지
+    const user = sessionStorage.getItem('user');
+    if (!user || user.trim() === '') {
+      alert('로그인이 필요한 서비스입니다.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lastSchedulingResult)
+      });
+
+      if (!res.ok) {
+        throw new Error('status ' + res.status);
+      }
+
+      alert('저장하였습니다. 마이페이지에서 확인하세요.');
+    } catch (e) {
+      console.error(e);
+      alert('저장 중 오류가 발생했습니다.');
+    }
   }
-}
 
-
-  // 초기 세팅
+  // --- 초기 세팅: 로그인 체크 + 헤더 버튼 + 이벤트 ---
   document.addEventListener('DOMContentLoaded', () => {
+    const user = sessionStorage.getItem('user');
+
+    // 로그인 안 되어 있으면 시뮬레이터 진입 불가
+    if (!user || user.trim() === '') {
+      alert('로그인이 필요한 서비스입니다.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // 헤더 프로필 버튼 세팅
+    const container = document.getElementById('authArea');
+    if (container) {
+      container.innerHTML = `
+        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </button>
+      `;
+    }
+
+    // 버튼 이벤트 & 기본 상태
     document.getElementById('add-proc-btn').addEventListener('click', addProcess);
     document.getElementById('reset-btn').addEventListener('click', resetSim);
     document.getElementById('run-btn').addEventListener('click', runSimulation);
     document.getElementById('algo-select').addEventListener('change', handleAlgoChange);
-
     document.getElementById('save-scheduling-record-btn')
-  .addEventListener('click', saveSchedulingRecord);
-
+      .addEventListener('click', saveSchedulingRecord);
 
     resetSim();
     handleAlgoChange();
   });
-
-
-
 </script>
 </body>
-
 </html>

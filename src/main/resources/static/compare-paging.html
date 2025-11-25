@@ -575,20 +575,28 @@
 <script>
   // --- 로그인 / 프로필 버튼 설정 + 버튼 이벤트 등록 ---
   document.addEventListener('DOMContentLoaded', () => {
+    // 1) 로그인 체크: 비로그인이면 페이지 진입 막기
+    const user = sessionStorage.getItem('user');
+    if (!user || user.trim() === '') {
+      alert('로그인이 필요한 서비스입니다.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // 2) 로그인된 상태면 프로필 아이콘 고정
     const container = document.getElementById('authArea');
     if (container) {
-      const user = sessionStorage.getItem('user');
-      container.innerHTML = (user && user.trim() !== '')
-        ? `
+      container.innerHTML = `
         <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
           <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="8" r="4"></circle>
             <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
           </svg>
-        </button>`
-        : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
+        </button>
+      `;
     }
 
+    // 3) 버튼 이벤트 등록
     const saveBtn = document.getElementById('save-compare-paging-btn');
     if (saveBtn) {
       saveBtn.addEventListener('click', saveComparePagingRecord);
@@ -883,6 +891,14 @@
 
     if (!scenarioSelect || !frameSelect || !alg1Select || !alg2Select) {
       alert('선택 정보를 읽어올 수 없습니다.');
+      return;
+    }
+
+    // 🔐 저장 시에도 한 번 더 로그인 확인
+    const user = sessionStorage.getItem('user');
+    if (!user || user.trim() === '') {
+      alert('로그인이 필요한 서비스입니다.');
+      window.location.href = 'login.html';
       return;
     }
 

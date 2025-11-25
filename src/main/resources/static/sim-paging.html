@@ -41,7 +41,6 @@
     }
     .dropdown-content a:hover{background:#333}
     .dropdown:hover .dropdown-content{display:block}
-    .dropdown > span > a{color:#fff;text-decoration:none}
     .actions{display:flex;align-items:center;gap:20px}
     .login-btn{
       background:var(--btn);color:#fff;border:none;padding:8px 16px;
@@ -78,18 +77,6 @@
       color:#d7e2ea;
       line-height:1.7;
       font-size:.96rem;
-    }
-
-    h2.md{
-      font-size:1.4rem;
-      margin:30px 0 12px;
-    }
-    h2.md::before{
-      content:"\25C6";
-      display:inline-block;
-      margin-right:8px;
-      color:#34b4ff;
-      vertical-align:middle;
     }
 
     .sim-layout{
@@ -134,7 +121,7 @@
       font-size:.85rem;
     }
     .field label{color:#c8d3dc}
-    select,input[type="number"],input[type="text"]{
+    select,input[type="number"]{
       background:#050506;
       color:var(--text);
       border-radius:10px;
@@ -206,11 +193,6 @@
       color:#e6f7ff;
       white-space:nowrap;
     }
-    .empty-row{
-      font-size:.83rem;
-      color:#7d8795;
-      text-align:center;
-    }
 
     .howto-list{
       list-style:none;
@@ -251,27 +233,11 @@
       opacity:.6;
     }
 
-    .chart-shell{
-      margin-top:4px;
-      margin-bottom:14px;
-      padding:16px 14px 20px;
-      border-radius:14px;
-      border:1px dashed var(--line);
-      background:#05070c;
-    }
-    .chart-placeholder{
-      height:120px;
-      border-radius:10px;
-      border:1px solid #1d2633;
-      background:radial-gradient(140% 160% at 80% 0%,#102744 0%,#05070c 60%);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:.85rem;
-      color:#93a4ba;
-      text-align:center;
-      padding:0 12px;
-      white-space:pre-line;
+    .frame-caption{
+      margin-top:6px;
+      font-size:.8rem;
+      color:#c0cfdd;
+      line-height:1.6;
     }
 
     .metrics-grid{
@@ -333,6 +299,175 @@
       font-size:.82rem;
       color:#9bb3c7;
     }
+
+    /* =============================
+       Page-flow Visualization 영역
+       ============================= */
+
+    .visual-area{
+      margin-top:10px;
+      padding:10px 14px 16px;
+      border:1px dashed var(--line);
+      border-radius:14px;
+      background:#05070c;
+    }
+
+    .visual-layout{
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+    }
+    @media (max-width:960px){
+      .visual-layout{flex-direction:column}
+    }
+
+    .visual-main{
+      flex:1;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .visual-wrapper{
+      display:flex;
+      align-items:flex-start;
+      gap:18px;
+      overflow-x:auto;
+      padding-bottom:6px;
+    }
+
+    .step-column{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-width:60px;
+    }
+
+    .step-label{
+      margin-bottom:8px;
+      font-size:.82rem;
+      color:#9cb7d1;
+    }
+
+    .frame-row{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:center;
+    }
+
+    .old-label,
+    .new-label{
+      font-size:.75rem;
+      color:#7d8795;
+      text-align:center;
+    }
+
+    .page-box{
+      width:38px;
+      height:38px;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.9rem;
+      font-weight:600;
+      color:#fff;
+      background:#11141d;
+      border:1px solid #2c3444;
+    }
+
+    .page-empty{
+      background:#0a0d13;
+      border:1px dashed #333;
+    }
+
+    .page-hit{
+      border-color:#0ecb81;
+      box-shadow:0 0 6px rgba(14,203,129,.5);
+    }
+
+    .page-fault-old{
+      border-color:#ff5c5c;
+      background:#1a0c0c;
+    }
+
+    .page-fault-new{
+      border-color:#ff5c5c;
+      background:#330c0c;
+    }
+
+    @keyframes glowPulse{
+      0%{ box-shadow:0 0 0px rgba(255,60,60,.3);}
+      50%{ box-shadow:0 0 12px rgba(255,60,60,.8);}
+      100%{ box-shadow:0 0 0px rgba(255,60,60,.3);}
+    }
+    .fault-animate{
+      animation:glowPulse .8s ease-out;
+    }
+
+    @keyframes slideUp{
+      0%{opacity:0;transform:translateY(6px);}
+      100%{opacity:1;transform:translateY(0);}
+    }
+    .slide-in{
+      animation:slideUp .45s ease-out;
+    }
+
+    .status-label{
+      font-size:.75rem;
+      margin-top:2px;
+    }
+    .status-fault{color:var(--bad);}
+    .status-hit{color:var(--good);}
+
+    /* 범례는 그림 아래 오른쪽 */
+    .visual-header{
+      margin-top:8px;
+      display:flex;
+      justify-content:flex-end;
+    }
+    .visual-legend{
+      border-radius:10px;
+      border:1px dashed #33495f;
+      padding:6px 8px;
+      font-size:.76rem;
+      color:#b9c2cc;
+      background:#050811;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      align-items:flex-start;
+    }
+    .legend-row{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .legend-box{
+      width:18px;
+      height:18px;
+      border-radius:6px;
+      display:inline-block;
+    }
+    .legend-empty{
+      border:1px dashed #444;
+      background:#05070c;
+    }
+    .legend-base{
+      border:1px solid #2c3444;
+      background:#11141d;
+    }
+    .legend-hit{
+      border:1px solid #0ecb81;
+      background:#111f17;
+      box-shadow:0 0 4px rgba(14,203,129,.7);
+    }
+    .legend-fault{
+      border:1px solid #ff5c5c;
+      background:#2a1010;
+      box-shadow:0 0 4px rgba(255,92,92,.7);
+    }
   </style>
 </head>
 <body>
@@ -340,7 +475,6 @@
   <a href="/index.html" class="logo">OS Platform</a>
 
   <nav>
-    <!-- Learn -->
     <div class="dropdown">
       <span>Learn</span>
       <div class="dropdown-content">
@@ -350,7 +484,6 @@
       </div>
     </div>
 
-    <!-- Simulator -->
     <div class="dropdown">
       <span>Simulator</span>
       <div class="dropdown-content">
@@ -360,7 +493,6 @@
       </div>
     </div>
 
-    <!-- Compare -->
     <div class="dropdown">
       <span>Compare</span>
       <div class="dropdown-content">
@@ -425,7 +557,6 @@
         </tr>
         </thead>
         <tbody id="ref-body">
-        <!-- JS에서 #1부터 추가 -->
         </tbody>
       </table>
     </section>
@@ -477,10 +608,35 @@
       접근 순서별 Hit / Fault 여부와 교체된 페이지, 프레임 상태를 한 번에 확인하세요.
     </div>
 
-    <div class="chart-shell">
-      <div class="chart-placeholder" id="chart-placeholder">
-        아직 시뮬레이션이 실행되지 않았습니다.
-        실행 후 이 영역에 타임라인·프레임 상태 등 시각화가 표시됩니다.
+    <!-- 시각화 영역 -->
+    <div class="visual-area">
+      <div class="visual-layout">
+        <div class="visual-main">
+          <div class="visual-wrapper" id="visual-wrapper"></div>
+
+          <div class="visual-header">
+            <div class="visual-legend">
+              <div class="legend-row">
+                <span class="legend-box legend-empty"></span>
+                <span> : 비어 있는 프레임</span>
+              </div>
+              <div class="legend-row">
+                <span class="legend-box legend-base"></span>
+                <span> : 단순 적재된 페이지</span>
+              </div>
+              <div class="legend-row">
+                <span class="legend-box legend-hit"></span>
+                <span> : Hit (재사용)</span>
+              </div>
+              <div class="legend-row">
+                <span class="legend-box legend-fault"></span>
+                <span> : Fault로 교체된 페이지</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="visual-caption" class="frame-caption" style="display:none;"></div>
+        </div>
       </div>
     </div>
 
@@ -509,7 +665,6 @@
       </button>
     </div>
 
-
     <table class="result-table" aria-label="접근별 시뮬레이션 결과">
       <thead>
       <tr>
@@ -537,32 +692,95 @@
 
 <script>
   let lastPagingResult = null;
-  // --- 로그인 / 프로필 버튼 ---
-  document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('authArea');
-    if (container) {
-      const user = sessionStorage.getItem('user');
-      container.innerHTML = (user && user.trim() !== '')
-        ? `
-        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
-          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-          </svg>
-        </button>`
-        : `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
-    }
-  });
 
-  // --- 참조 추가/초기화 로직 ---
+
+  // 시각화 생성
+  function renderVisualSteps(steps, refs){
+    const wrap = document.getElementById('visual-wrapper');
+    wrap.innerHTML = '';
+    if (!steps || steps.length === 0) return;
+
+    const frameLen = (steps[0].frame || []).length;
+    let prevFrame = Array(frameLen).fill(null);
+
+    steps.forEach((step) => {
+      const col = document.createElement('div');
+      col.className = 'step-column';
+
+      const label = document.createElement('div');
+      label.className = 'step-label';
+      label.textContent = step.ref;
+      col.appendChild(label);
+
+      const rowWrapper = document.createElement('div');
+      rowWrapper.className = 'frame-row';
+
+      const oldLabel = document.createElement('div');
+      oldLabel.className = 'old-label';
+      oldLabel.textContent = 'old';
+      rowWrapper.appendChild(oldLabel);
+
+      const oldFrame = prevFrame.slice();
+      const curFrame = (step.frame || []).slice();
+
+      // old 프레임
+      oldFrame.forEach((val)=>{
+        const box = document.createElement('div');
+        box.className = 'page-box';
+        if(val === null || val === undefined){
+          box.classList.add('page-empty');
+          box.textContent = '';
+        } else {
+          box.textContent = val;
+        }
+        if(step.fault && step.victim === val){
+          box.classList.add('page-fault-old','fault-animate');
+        } else if(!step.fault){
+          box.classList.add('page-hit');
+        }
+        rowWrapper.appendChild(box);
+      });
+
+      const newLabel = document.createElement('div');
+      newLabel.className = 'new-label';
+      newLabel.textContent = 'new';
+      rowWrapper.appendChild(newLabel);
+
+      // new 프레임
+      curFrame.forEach((val)=>{
+        const box = document.createElement('div');
+        box.className = 'page-box slide-in';
+        if(val === null || val === undefined){
+          box.classList.add('page-empty');
+          box.textContent = '';
+        } else {
+          box.textContent = val;
+        }
+        if(step.fault && val === step.ref){
+          box.classList.add('page-fault-new','fault-animate');
+        } else if(!step.fault){
+          box.classList.add('page-hit');
+        }
+        rowWrapper.appendChild(box);
+      });
+
+      const status = document.createElement('div');
+      status.className = 'status-label ' + (step.fault ? 'status-fault' : 'status-hit');
+      status.textContent = step.fault ? 'F' : 'H';
+      rowWrapper.appendChild(status);
+
+      col.appendChild(rowWrapper);
+      wrap.appendChild(col);
+
+      prevFrame = curFrame;
+    });
+  }
+
+  // 참조 추가/초기화
   let refCount = 0;
 
   function createRefRow(index, pageVal = '') {
     const tbody = document.getElementById('ref-body');
-
-    const placeholder = tbody.querySelector('.empty-row');
-    if (placeholder) placeholder.remove();
-
     const tr = document.createElement('tr');
 
     const tdIdx = document.createElement('td');
@@ -591,9 +809,8 @@
     const tbody = document.getElementById('ref-body');
     tbody.innerHTML = '';
     refCount = 0;
-    addReference(); // 기본 한 줄
+    addReference();
 
-    // 지표 리셋
     document.getElementById('total-faults').textContent = '–';
     document.getElementById('fault-rate').textContent = '–';
     document.getElementById('total-hits').textContent = '–';
@@ -603,14 +820,15 @@
       '<tr><td colspan="5" class="result-placeholder">시뮬레이션을 실행하면 여기에서 각 접근 단계의 결과를 확인할 수 있습니다.</td></tr>';
     document.getElementById('run-info').textContent = '아직 실행 기록이 없습니다.';
 
-    const chartBox = document.getElementById('chart-placeholder');
-    chartBox.textContent =
-'아직 시뮬레이션이 실행되지 않았습니다.\n실행 후 이 영역에 타임라인·프레임 상태 등 시각화가 표시됩니다.';
+    const wrap = document.getElementById('visual-wrapper');
+    if (wrap) wrap.innerHTML = '';
+
+    lastPagingResult = null;
   }
 
-  // --- 백엔드 연동 시뮬레이션 실행 ---
+  // 시뮬레이션 실행
   async function runSimulation() {
-    const algo = document.getElementById('algo-select').value;   // FIFO / LRU / ...
+    const algo = document.getElementById('algo-select').value;
     const frameCount = parseInt(document.getElementById('frame-count').value, 10);
 
     if (!frameCount || frameCount <= 0) {
@@ -618,7 +836,6 @@
       return;
     }
 
-    // 1) 참조열 입력값 수집
     const tbody = document.getElementById('ref-body');
     const rows = Array.from(tbody.querySelectorAll('tr'));
     const refs = [];
@@ -629,9 +846,7 @@
       const val = input.value.trim();
       if (val === '') return;
       const page = parseInt(val, 10);
-      if (!Number.isNaN(page)) {
-        refs.push(page);
-      }
+      if (!Number.isNaN(page)) refs.push(page);
     });
 
     if (refs.length === 0) {
@@ -640,19 +855,16 @@
     }
 
     try {
-      // 2) 백엔드로 요청
       const res = await fetch('/api/sim/paging', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ algo, frames: frameCount, refs })
       });
 
-      if (!res.ok) {
-        throw new Error('서버 오류: ' + res.status);
-      }
+      if (!res.ok) throw new Error('서버 오류: ' + res.status);
 
       const data = await res.json();
-      const steps = data.steps || [];   // [{ref, frame:[...], fault:true/false}, ...]
+      const steps = data.steps || [];
       const faults = data.faults ?? 0;
 
       const total = refs.length;
@@ -660,23 +872,19 @@
       const faultRate = total > 0 ? ((faults / total) * 100).toFixed(2) : '0.00';
       const hitRate = total > 0 ? ((hits / total) * 100).toFixed(2) : '0.00';
 
-      // 3) 상단 요약 값 채우기
       document.getElementById('total-faults').textContent = faults;
       document.getElementById('fault-rate').textContent = isNaN(faultRate) ? '0.00' : faultRate;
       document.getElementById('total-hits').textContent = hits;
       document.getElementById('hit-rate').textContent = isNaN(hitRate) ? '0.00' : hitRate;
 
-      // 4) 단계별 결과 테이블 채우기
       const resultBody = document.getElementById('result-body');
       resultBody.innerHTML = '';
 
       steps.forEach((step, idx) => {
-        const tr = document.createElement('tr');
         const framesText = '[' + (step.frame || []).join(' ') + ']';
-        const victimText = (step.victim === null || step.victim === undefined)
-          ? '-'
-          : step.victim;
+        const victimText = (step.victim === null || step.victim === undefined) ? '-' : step.victim;
 
+        const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${idx + 1}</td>
           <td>${step.ref}</td>
@@ -689,18 +897,8 @@
         resultBody.appendChild(tr);
       });
 
-      // 5) 차트 영역 텍스트
-      const chartBox = document.getElementById('chart-placeholder');
-      chartBox.textContent =
-`[백엔드 결과 기반 타임라인 정보 - ${algo}]
-총 접근 수: ${total}
-총 Page Fault: ${faults}
-총 Hit: ${hits}
-Fault Rate: ${isNaN(faultRate) ? '0.00' : faultRate}%
-Hit Rate: ${isNaN(hitRate) ? '0.00' : hitRate}%
-(추후 이 영역에 프레임 상태 변화를 시각화해서 사용할 수 있습니다.)`;
+      renderVisualSteps(steps, refs);
 
-      // 6) 마지막 실행 정보
       const now = new Date();
       const info = [
         '마지막 실행: ',
@@ -712,20 +910,18 @@ Hit Rate: ${isNaN(hitRate) ? '0.00' : hitRate}%
       ].join('');
       document.getElementById('run-info').textContent = info;
 
-          // 7) 저장용 결과 구성
-    lastPagingResult = {
-      type: 'paging',
-      title: `Page Replacement (${algo})`,
-      algo,
-      frameCount,
-      refs,          // 사용자가 입력한 참조열 그대로
-      faults,
-      hits,
-      faultRate: Number(faultRate),
-      hitRate: Number(hitRate),
-      steps          // 각 step의 frame 상태/Hit/Fault 정보
-    };
-
+      lastPagingResult = {
+        type: 'paging',
+        title: `Page Replacement (${algo})`,
+        algo,
+        frameCount,
+        refs,
+        faults,
+        hits,
+        faultRate: Number(faultRate),
+        hitRate: Number(hitRate),
+        steps
+      };
 
     } catch (err) {
       console.error(err);
@@ -733,7 +929,7 @@ Hit Rate: ${isNaN(hitRate) ? '0.00' : hitRate}%
     }
   }
 
-  // --- 리액트(3000)에서 8080으로 링크 강제 ---
+  // 3000 포트에서 링크 강제
   (function () {
     if (location.port === '3000') {
       document.querySelectorAll('.dropdown-content a').forEach(a => {
@@ -749,43 +945,63 @@ Hit Rate: ${isNaN(hitRate) ? '0.00' : hitRate}%
   })();
 
   async function savePagingRecord() {
-  if (!lastPagingResult) {
-    alert('먼저 시뮬레이션을 실행해주세요.');
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/records', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(lastPagingResult)
-    });
-
-    if (!res.ok) {
-      throw new Error('status ' + res.status);
+    if (!lastPagingResult) {
+      alert('먼저 시뮬레이션을 실행해주세요.');
+      return;
     }
 
-    alert('저장하였습니다. 마이페이지에서 확인하세요.');
-  } catch (e) {
-    console.error(e);
-    alert('저장 중 오류가 발생했습니다.');
+    const user = sessionStorage.getItem('user');
+    if (!user || user.trim() === '') {
+      alert('로그인이 필요한 서비스입니다.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lastPagingResult)
+      });
+
+      if (!res.ok) throw new Error('status ' + res.status);
+
+      alert('저장하였습니다. 마이페이지에서 확인하세요.');
+    } catch (e) {
+      console.error(e);
+      alert('저장 중 오류가 발생했습니다.');
+    }
   }
-}
 
-
-  // 초기 세팅
   document.addEventListener('DOMContentLoaded', () => {
+
+    const user = sessionStorage.getItem('user');
+    if (!user || user.trim() === '') {
+      alert('로그인이 필요한 서비스입니다.');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // 2) 헤더 authArea에 프로필 아이콘 세팅
+    const container = document.getElementById('authArea');
+    if (container) {
+      container.innerHTML = `
+        <button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
+          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </button>
+      `;
+    }
+
+
     document.getElementById('add-ref-btn').addEventListener('click', addReference);
     document.getElementById('reset-btn').addEventListener('click', resetSim);
     document.getElementById('run-btn').addEventListener('click', runSimulation);
-
-    document.getElementById('save-paging-record-btn')
-  .addEventListener('click', savePagingRecord);
-
-
+    document.getElementById('save-paging-record-btn').addEventListener('click', savePagingRecord);
     resetSim();
   });
 </script>
 </body>
-
 </html>
