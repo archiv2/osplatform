@@ -24,7 +24,28 @@
       display:flex;justify-content:space-between;align-items:center;
       padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)
     }
-    .logo{font-size:1.4em;font-weight:700;color:var(--accent)}
+    .logo{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    text-decoration:none;   /* 밑줄 제거 */
+    }
+
+    /* 글자 스타일 (항상 하얀색) */
+    .logo-text{
+        font-size:1.4em;
+        font-weight:700;
+        color:#ffffff;          /* ← 무조건 흰색으로 통일 */
+    }
+
+    /* 아이콘 크기 */
+    .logo-icon{
+        width:26px;
+        height:26px;
+        flex-shrink:0;
+    }
+
+
     nav{display:flex;align-items:center;gap:150px}
     .dropdown{position:relative;display:inline-block;padding:6px 0;cursor:pointer}
     .dropdown::after{
@@ -44,6 +65,26 @@
     .dropdown > span > a{color:#fff;text-decoration:none}
     .actions{display:flex;align-items:center;gap:20px}
     #authArea{}
+
+    .profile-btn{
+      background:transparent;
+      border:none;
+      padding:0;
+      cursor:pointer;
+      line-height:0;
+      border-radius:999px;
+      outline:none;
+    }
+    .profile-btn svg{
+      width:36px;
+      height:36px;
+      background:#fff;
+      border-radius:999px;
+      padding:4px;
+    }
+    .profile-btn:hover svg{
+      box-shadow:0 0 0 3px rgba(0,191,255,.25);
+    }
 
     .btn-row{
       display:flex;
@@ -229,7 +270,31 @@
       padding:10px;
       font-size:.8rem;
       color:#778495;
-      text-align:center;
+      text-align:left;   /* 왼쪽 정렬로 변경 */
+      min-height:32px;
+      display:flex;
+      align-items:center;
+    }
+
+    /* 🔹 Frame Timeline 점 그래프 */
+    .timeline-visual{
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      justify-content:flex-start;
+    }
+    .timeline-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:#334155;   /* 기본: 회색 */
+      opacity:0.95;
+    }
+    .timeline-dot.fault{
+      background:var(--bad);   /* 빨강: Fault */
+    }
+    .timeline-dot.hit{
+      background:var(--good);  /* 초록: Hit */
     }
 
     .compare-note{
@@ -260,7 +325,16 @@
 </head>
 <body>
 <header>
-  <a href="/index.html" class="logo">OS Platform</a>
+  <a href="/index.html" class="logo">
+    <svg class="logo-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" stroke="#00bfff" stroke-width="2" fill="none" />
+      <path d="M2 12h20M12 2c3.5 4 3.5 16 0 20M12 2c-3.5 4-3.5 16 0 20"
+            stroke="#00bfff" stroke-width="2" fill="none"/>
+    </svg>
+    <span class="logo-text">OS Platform</span>
+  </a>
+
+
 
   <nav>
     <!-- Learn -->
@@ -279,7 +353,6 @@
       <div class="dropdown-content">
         <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
         <a href="/sim-paging.html">Page Replacement Simulator</a>
-        <a href="/sim-deadlock.html">Deadlock Simulator</a>
       </div>
     </div>
 
@@ -291,7 +364,6 @@
         <a href="/compare-paging.html">Paging Algorithms Compare</a>
       </div>
     </div>
-
   </nav>
 
   <div class="actions">
@@ -407,7 +479,7 @@
         </td>
         <td>
           스캔 주기·리스트 크기에 따라 성능이 달라지며,
-          정확 LRU만큼 정밀하지는 않음. 구현에 따라 다양한 변종이 존재
+          정확 LRU만큼 정밀하지는 못함. 구현에 따라 다양한 변종이 존재
         </td>
       </tr>
       </tbody>
@@ -662,6 +734,7 @@
     return amat;
   }
 
+  // 문자열 버전 타임라인 (필요하면 마이페이지 등에서 사용)
   function formatTimeline(steps) {
     if (!steps || steps.length === 0) {
       return '시뮬레이션 결과가 없습니다.';
@@ -675,6 +748,34 @@
       return parts.slice(0, maxLen).join('  ') + '  …';
     }
     return parts.join('  ');
+  }
+
+  // 🔹 초록/빨강 점으로 보여주는 Frame Timeline
+  function renderTimelineVisual(containerId, steps) {
+    const box = document.getElementById(containerId);
+    if (!box) return;
+
+    box.innerHTML = '';
+
+    if (!steps || steps.length === 0) {
+      box.textContent = '시뮬레이션 결과가 없습니다.';
+      return;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'timeline-visual';
+
+    steps.forEach((step, idx) => {
+      const dot = document.createElement('div');
+      dot.className = 'timeline-dot ' + (step.fault ? 'fault' : 'hit');
+
+      const tagText = step.fault ? 'Fault' : 'Hit';
+      dot.title = `#${idx + 1}: ${step.ref} (${tagText})`;
+
+      wrap.appendChild(dot);
+    });
+
+    box.appendChild(wrap);
   }
 
   function renderPagingResult(side, algo, data, refCount) {
@@ -699,7 +800,9 @@
     hrEl.textContent = (hitRate * 100).toFixed(1) + ' %';
     aEl.textContent  = amat.toFixed(2) + ' (단위 시간 기준)';
     dEl.textContent  = '-'; // Dirty 페이지는 현재 시뮬에서 미구현
-    tEl.textContent  = formatTimeline(steps);
+
+    // 👉 점 그래프 타임라인 렌더링
+    renderTimelineVisual(prefix + '-timeline', steps);
 
     fEl.classList.remove('placeholder');
     frEl.classList.remove('placeholder');

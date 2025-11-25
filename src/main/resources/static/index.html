@@ -11,7 +11,21 @@
       display:flex; justify-content:space-between; align-items:center;
       padding:20px 60px; background:#0a0a0a; border-bottom:1px solid #222;
     }
-    .logo { font-size:1.4em; font-weight:700; color:#00bfff; }
+    .logo {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;      /* 밑줄 제거 */
+    display: flex;              /* 아이콘 + 텍스트 정렬 */
+    align-items: center;        /* 세로 가운데 맞춤 */
+    gap: 8px;                   /* 아이콘과 텍스트 간격 */
+    }
+
+    .logo-icon {
+        width: 26px;
+        height: 26px;
+    }
+
 
     nav { display:flex; align-items:center; gap:150px; }
     .dropdown { position:relative; display:inline-block; padding:6px 0; cursor:pointer; }
@@ -55,7 +69,15 @@
 </head>
 <body>
   <header>
-    <a href="/index.html" class="logo">OS Platform</a>
+    <a href="/index.html" class="logo">
+      <svg class="logo-icon" viewBox="0 0 24 24" fill="#00bfff" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#00bfff" stroke-width="2" fill="none" />
+        <path d="M2 12h20M12 2c3.5 4 3.5 16 0 20M12 2c-3.5 4-3.5 16 0 20" stroke="#00bfff" stroke-width="2" fill="none"/>
+      </svg>
+      OS Platform
+    </a>
+
+
 
 
     <nav>
@@ -72,7 +94,6 @@
         <div class="dropdown-content">
           <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
           <a href="/sim-paging.html">Page Replacement Simulator</a>
-          <a href="#">Deadlock Simulator</a>
         </div>
       </div>
       <div class="dropdown">
@@ -87,17 +108,11 @@
     <div class="actions">
       <div id="authArea"></div>
 
-      <div class="dropdown">Language 🌐
-        <div class="dropdown-content">
-          <a href="#">Korean</a>
-          <a href="#">English</a>
-        </div>
-      </div>
     </div>
   </header>
 
   <main>
-    <h1>An <span>OS Platform</span> for<br> Scheduling, Paging, and Deadlock Simulation</h1>
+    <h1>Exploring <span>OS</span> Through Visualization</h1>
   </main>
 
   <script>

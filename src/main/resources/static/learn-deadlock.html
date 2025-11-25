@@ -19,7 +19,27 @@
       display:flex;justify-content:space-between;align-items:center;
       padding:20px 60px;background:var(--bg-2);border-bottom:1px solid var(--line)
     }
-    .logo{font-size:1.4em;font-weight:700;color:var(--accent)}
+    .logo{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    text-decoration:none;   /* 밑줄 제거 */
+    }
+
+    /* 글자 스타일 (항상 하얀색) */
+    .logo-text{
+        font-size:1.4em;
+        font-weight:700;
+        color:#ffffff;          /* ← 무조건 흰색으로 통일 */
+    }
+
+    /* 아이콘 크기 */
+    .logo-icon{
+        width:26px;
+        height:26px;
+        flex-shrink:0;
+    }
+
     nav{display:flex;align-items:center;gap:150px}
     .dropdown{position:relative;display:inline-block;padding:6px 0;cursor:pointer}
     .dropdown::after{
@@ -39,6 +59,41 @@
     .dropdown > span > a{color:#fff;text-decoration:none}
     .actions{display:flex;align-items:center;gap:20px}
     #authArea{}
+     .login-btn {
+      background:#0078ff;
+      color:#fff;
+      border:none;
+      padding:8px 16px;
+      border-radius:20px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .login-btn:hover {
+      background:#005ec9;
+    }
+
+    .profile-btn{
+      background:transparent;
+      border:none;
+      padding:0;
+      cursor:pointer;
+      line-height:0;
+      border-radius:999px;
+      outline:none;
+    }
+    .profile-btn svg{
+      width:36px;
+      height:36px;
+      background:#fff;
+      border-radius:999px;
+      padding:4px;
+    }
+    .profile-btn:hover svg{
+      box-shadow:0 0 0 3px rgba(0,191,255,.25);
+    }
+
+
+
     @media (max-width:880px){
       header{padding:16px 20px;flex-wrap:wrap;gap:12px}
       nav{gap:40px}
@@ -164,7 +219,16 @@
 </head>
 <body>
 <header>
-  <a href="/index.html" class="logo">OS Platform</a>
+  <a href="/index.html" class="logo">
+    <svg class="logo-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" stroke="#00bfff" stroke-width="2" fill="none" />
+      <path d="M2 12h20M12 2c3.5 4 3.5 16 0 20M12 2c-3.5 4-3.5 16 0 20"
+            stroke="#00bfff" stroke-width="2" fill="none"/>
+    </svg>
+    <span class="logo-text">OS Platform</span>
+  </a>
+
+
 
   <nav>
     <!-- Learn -->
@@ -183,7 +247,6 @@
       <div class="dropdown-content">
         <a href="/sim-scheduling.html">CPU Scheduling Simulator</a>
         <a href="/sim-paging.html">Page Replacement Simulator</a>
-        <a href="/sim-deadlock.html">Deadlock Simulator</a>
       </div>
     </div>
 
@@ -599,24 +662,32 @@
     </div>
   </div>
 </div>
-// 로그인/프로필 버튼 유지
-document.addEventListener('DOMContentLoaded', () => {
-const container = document.getElementById('authArea');
-if (!container) return;
-const user = sessionStorage.getItem('user');
-
-if (user && user.trim() !== '') {
-container.innerHTML = `
-<button class="profile-btn" aria-label="My Page" title="My Page" onclick="location.href='mypage.html'">
-  <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="4"></circle>
-    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-  </svg>
-</button>`;
-} else {
-container.innerHTML = `<button class="login-btn" onclick="location.href='login.html'">Login</button>`;
-}
-});
-
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('authArea');
+    if (!container) return;
+
+    const user = sessionStorage.getItem('user'); // 세션 기반 로그인 확인
+
+    if (user && user.trim() !== '') {
+      // 로그인 상태 → 마이페이지 아이콘
+      container.innerHTML = `
+        <button class="profile-btn" aria-label="My Page" title="My Page"
+                onclick="location.href='mypage.html'">
+          <svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+          </svg>
+        </button>
+      `;
+    } else {
+      // 비로그인 상태 → 로그인 버튼
+      container.innerHTML = `
+        <button class="login-btn" onclick="location.href='login.html'">Login</button>
+      `;
+    }
+  });
+</script>
+
 </html>
